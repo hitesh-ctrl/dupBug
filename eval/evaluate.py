@@ -95,14 +95,19 @@ def rank_of(original: int, returned: list[int]) -> int | None:
     return returned.index(original) + 1 if original in returned else None
 
 
-def run_split(name: str, pairs: list[list[int]], issues: dict[int, dict], api: str, es: str):
+LEAKS = {"queries_with_newer_results": 0}
+
+
+def run_split(name: str, pairs: list[list[int]], issues: dict[int, dict], api: str, es: str, abort_on_leak: bool = True):
     rows, naive_rows, failures, lat = [], [], [], []
     for dup_n, orig_n in pairs:
         dup = issues[dup_n]
         returned, ms = query_service(api, dup)
         lat.append(ms)
         newer = [n for n in returned if issues[n]["created_at"] >= dup["created_at"]]
-        if newer:
+        if newer and not abort_on_leak:
+            LEAKS["queries_with_newer_results"] += 1
+        elif newer:
             sys.exit(f"FUTURE LEAK: query #{dup_n} returned newer or same issue(s) {newer}")
         rank = rank_of(orig_n, returned)
         rows.append([dup_n, orig_n, rank])
@@ -120,6 +125,8 @@ def main() -> None:
     ap.add_argument("--out", default="results/metrics.json")
     ap.add_argument("--failures", default="results/failures.json")
     ap.add_argument("--note", default="")
+    ap.add_argument("--count-leaks", action="store_true",
+                    help="demonstration only: count queries that returned newer issues instead of aborting")
     args = ap.parse_args()
 
     issues = load_issues()
@@ -143,7 +150,7 @@ def main() -> None:
     }
     failures, latencies = [], []
     for name in ["tuning"] + (["heldout"] if args.final else []):
-        rows, naive_rows, fails, lat = run_split(name, manifest[name], issues, args.api, args.es)
+        rows, naive_rows, fails, lat = run_split(name, manifest[name], issues, args.api, args.es, not args.count_leaks)
         s = summarize([r[2] for r in rows])
         n = summarize([r[2] for r in naive_rows])
         out["service"][name] = s
@@ -161,6 +168,8 @@ def main() -> None:
         "p95": round(percentile(latencies, 95), 1),
         "note": "client-side, localhost, sequential requests; not a network measurement",
     }
+    if args.count_leaks:
+        out["future_leaks"] = dict(LEAKS)
     (ROOT / args.out).parent.mkdir(exist_ok=True, parents=True)
     (ROOT / args.out).write_text(json.dumps(out, indent=1) + "\n")
     (ROOT / args.failures).write_text(json.dumps(failures, indent=1) + "\n")

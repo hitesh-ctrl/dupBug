@@ -10,3 +10,6 @@ __pycache__/
 *.pyc
 .DS_Store
 results/tuning/
+results/planted/*.log
+results/planted/*.metrics.json
+results/planted/*.failures.json

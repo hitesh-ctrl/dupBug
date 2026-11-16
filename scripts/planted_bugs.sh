@@ -30,9 +30,17 @@ from pathlib import Path
 label, rows = sys.argv[1], [json.loads(r) for r in sys.argv[2:]]
 root = Path("results/planted")
 for r in rows:
-    r["caught_by"] = [n for n, k in (("api_tests", "api_tests_exit"), ("evaluation", "evaluation_exit"), ("gate", "gate_exit")) if r[k] != 0]
     mf = root / f"{label}.{r['bug']}.metrics.json"
     r["metrics"] = json.loads(mf.read_text())["service"] if mf.exists() else None
+    if r["metrics"] is None:
+        r["gate_exit"] = None  # evaluation aborted, so the gate had nothing to compare: not an independent catch
+    r["caught_by"] = [n for n, k in (("api_tests", "api_tests_exit"), ("evaluation", "evaluation_exit"), ("gate", "gate_exit")) if r[k]]
+    eval_log = (root / f"{label}.{r['bug']}.eval.log").read_text().strip().splitlines()
+    r["evaluation_last_line"] = eval_log[-1][:120] if r["evaluation_exit"] else ""
+    api_log = (root / f"{label}.{r['bug']}.api.log").read_text()
+    r["api_tests_failed"] = sorted({l.split(" > ", 1)[1].strip() for l in api_log.splitlines() if l.strip().startswith("FAIL") and " > " in l})
+    base = json.loads(Path("results/baseline.json").read_text())["service"]
+    r["tuning_mrr_change"] = round(r["metrics"]["tuning"]["mrr"] - base["tuning"]["mrr"], 4) if r["metrics"] else None
     gate_log = (root / f"{label}.{r['bug']}.gate.log").read_text()
     r["gate_problem_count"] = sum(1 for line in gate_log.splitlines() if line.startswith("  - "))
     r["caught"] = bool(r["caught_by"])

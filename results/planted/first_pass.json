@@ -1,0 +1,83 @@
+{
+ "label": "first_pass",
+ "total": 3,
+ "caught": 3,
+ "bugs": [
+  {
+   "bug": "BUG_NO_TITLE_BOOST",
+   "api_tests_exit": 0,
+   "evaluation_exit": 0,
+   "gate_exit": 1,
+   "metrics": {
+    "tuning": {
+     "n": 1320,
+     "hit_at_5": 0.2909,
+     "hit_at_10": 0.3773,
+     "mrr": 0.1906
+    },
+    "heldout": {
+     "n": 566,
+     "hit_at_5": 0.2155,
+     "hit_at_10": 0.2915,
+     "mrr": 0.1356
+    }
+   },
+   "caught_by": [
+    "gate"
+   ],
+   "evaluation_last_line": "",
+   "api_tests_failed": [],
+   "tuning_mrr_change": -0.0061,
+   "gate_problem_count": 62,
+   "caught": true
+  },
+  {
+   "bug": "BUG_NO_STEMMING",
+   "api_tests_exit": 0,
+   "evaluation_exit": 0,
+   "gate_exit": 1,
+   "metrics": {
+    "tuning": {
+     "n": 1320,
+     "hit_at_5": 0.2682,
+     "hit_at_10": 0.3561,
+     "mrr": 0.1853
+    },
+    "heldout": {
+     "n": 566,
+     "hit_at_5": 0.2067,
+     "hit_at_10": 0.2792,
+     "mrr": 0.1418
+    }
+   },
+   "caught_by": [
+    "gate"
+   ],
+   "evaluation_last_line": "",
+   "api_tests_failed": [],
+   "tuning_mrr_change": -0.0114,
+   "gate_problem_count": 114,
+   "caught": true
+  },
+  {
+   "bug": "BUG_NO_TIME_FILTER",
+   "api_tests_exit": 1,
+   "evaluation_exit": 1,
+   "gate_exit": null,
+   "metrics": null,
+   "caught_by": [
+    "api_tests",
+    "evaluation"
+   ],
+   "evaluation_last_line": "FUTURE LEAK: query #75 returned newer or same issue(s) [75, 5864, 5502, 4119, 2540, 78, 4669, 7700, 2553, 802]",
+   "api_tests_failed": [
+    "POST /similar: no looking into the future > holds for every fixture issue used as the query",
+    "POST /similar: no looking into the future > never returns an issue created at or after the query issue, nor the issue itself",
+    "POST /similar: no looking into the future > the oldest issue has nothing before it"
+   ],
+   "tuning_mrr_change": null,
+   "gate_problem_count": 0,
+   "caught": true
+  }
+ ]
+}

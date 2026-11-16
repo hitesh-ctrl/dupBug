@@ -56,6 +56,16 @@ describe("POST /similar: response shape", () => {
   });
 });
 
+// Added in Phase 4 after the first planted-bug pass (stemming was only caught by the evaluation gate).
+describe("POST /similar: stemming", () => {
+  it("matches different word forms (flickering scrollbars resized -> scrollbar flickers while resizing)", async () => {
+    const res = await request(app).post("/similar").send({ title: "flickering scrollbars resized" });
+    expect(res.status).toBe(200);
+    expect(res.body.results.map((r: { number: number }) => r.number)).toContain(6);
+    expect(res.body.results[0].number).toBe(6);
+  });
+});
+
 describe("POST /similar: validation", () => {
   const bad: [string, unknown][] = [
     ["empty title", { title: "", body: "x" }],
