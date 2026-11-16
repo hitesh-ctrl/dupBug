@@ -7,7 +7,7 @@ PID="$ROOT/tools/es.pid"
 URL="http://127.0.0.1:9200"
 if curl -fs "$URL" >/dev/null 2>&1; then echo "already running at $URL"; exit 0; fi
 [ -x "$ES_HOME/bin/elasticsearch" ] || { echo "run scripts/es_setup.sh first" >&2; exit 1; }
-"$ES_HOME/bin/elasticsearch" -d -p "$PID"
+"$ES_HOME/bin/elasticsearch" -d -p "$PID" >/dev/null 2>&1
 for _ in $(seq 1 120); do
   if curl -fs "$URL/_cluster/health?wait_for_status=yellow&timeout=1s" >/dev/null 2>&1; then
     curl -fs "$URL/_cluster/health?filter_path=cluster_name,status,number_of_nodes"; echo; exit 0

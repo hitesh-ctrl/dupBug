@@ -1,0 +1,221 @@
+{
+ "seed": 20261117,
+ "sampled": 30,
+ "correct": 28,
+ "doubtful_or_wrong": 2,
+ "accuracy": 0.9333,
+ "checked_on": "extraction v1 (before the list-reference fix), 1,925 pairs",
+ "checked_by": "AI assistant reading titles, bodies and the referencing comment",
+ "rows": [
+  {
+   "n": 1,
+   "duplicate": 9480,
+   "original": 4217,
+   "verdict": "correct",
+   "note": "both about running Terminal as a different user identity"
+  },
+  {
+   "n": 2,
+   "duplicate": 3125,
+   "original": 878,
+   "verdict": "correct",
+   "note": "both: wt ignores the caller's working directory"
+  },
+  {
+   "n": 3,
+   "duplicate": 1010,
+   "original": 521,
+   "verdict": "correct",
+   "note": "both: AltGr key combinations (e.g. @) cannot be typed"
+  },
+  {
+   "n": 4,
+   "duplicate": 3829,
+   "original": 3801,
+   "verdict": "correct",
+   "note": "both: typing exit in a second tab closes the whole window"
+  },
+  {
+   "n": 5,
+   "duplicate": 3596,
+   "original": 2397,
+   "verdict": "correct",
+   "note": "both: arrow keys arrive with wrong key codes through ConPTY"
+  },
+  {
+   "n": 6,
+   "duplicate": 3688,
+   "original": 531,
+   "verdict": "correct",
+   "note": "both ask for a fullscreen mode; the comment names two issues (#531 and #3411), extraction v1 kept only the first"
+  },
+  {
+   "n": 7,
+   "duplicate": 4787,
+   "original": 4109,
+   "verdict": "doubtful",
+   "note": "maintainer writes 'without more details, this sounds like'; report body is empty; link not convincing"
+  },
+  {
+   "n": 8,
+   "duplicate": 4435,
+   "original": 603,
+   "verdict": "correct",
+   "note": "both ask for plain background opacity without acrylic"
+  },
+  {
+   "n": 9,
+   "duplicate": 3692,
+   "original": 3446,
+   "verdict": "correct",
+   "note": "both: window content not drawn after restore/maximize"
+  },
+  {
+   "n": 10,
+   "duplicate": 4792,
+   "original": 4472,
+   "verdict": "correct",
+   "note": "both: wt subcommands should act on the existing window"
+  },
+  {
+   "n": 11,
+   "duplicate": 5841,
+   "original": 4472,
+   "verdict": "correct",
+   "note": "both: run wt commands in an existing window/session"
+  },
+  {
+   "n": 12,
+   "duplicate": 2071,
+   "original": 1032,
+   "verdict": "correct",
+   "note": "both: elevated / other-user tabs (megathread)"
+  },
+  {
+   "n": 13,
+   "duplicate": 577,
+   "original": 564,
+   "verdict": "correct",
+   "note": "both: drag the window by the tab bar area"
+  },
+  {
+   "n": 14,
+   "duplicate": 9850,
+   "original": 766,
+   "verdict": "correct",
+   "note": "both: restore previously open tabs"
+  },
+  {
+   "n": 15,
+   "duplicate": 8272,
+   "original": 2991,
+   "verdict": "correct",
+   "note": "both: dropdown shows default instead of user key bindings"
+  },
+  {
+   "n": 16,
+   "duplicate": 4880,
+   "original": 1571,
+   "verdict": "correct",
+   "note": "folder grouping of profiles is tracked in the dropdown-customisation issue; low text overlap but same request"
+  },
+  {
+   "n": 17,
+   "duplicate": 4369,
+   "original": 610,
+   "verdict": "correct",
+   "note": "font rendering problem, folded into the font rendering thread"
+  },
+  {
+   "n": 18,
+   "duplicate": 4317,
+   "original": 2865,
+   "verdict": "correct",
+   "note": "both: Ctrl+Space not delivered to the application"
+  },
+  {
+   "n": 19,
+   "duplicate": 5962,
+   "original": 1386,
+   "verdict": "correct",
+   "note": "both: installation without the Store"
+  },
+  {
+   "n": 20,
+   "duplicate": 7850,
+   "original": 3158,
+   "verdict": "correct",
+   "note": "duplicate-pane does not keep the directory = new tab in same directory request"
+  },
+  {
+   "n": 21,
+   "duplicate": 2914,
+   "original": 1564,
+   "verdict": "correct",
+   "note": "both ask for a settings UI"
+  },
+  {
+   "n": 22,
+   "duplicate": 10177,
+   "original": 9320,
+   "verdict": "correct",
+   "note": "both: settings dropdown floats outside the window when scrolling"
+  },
+  {
+   "n": 23,
+   "duplicate": 6171,
+   "original": 878,
+   "verdict": "correct",
+   "note": "both: start in current working directory; the comment lists the original followed by nine sibling duplicates, v1 kept only the first (which is the right original)"
+  },
+  {
+   "n": 24,
+   "duplicate": 8144,
+   "original": 7360,
+   "verdict": "correct",
+   "note": "maintainer concludes same by-design behaviour for background colour on new lines"
+  },
+  {
+   "n": 25,
+   "duplicate": 5259,
+   "original": 3609,
+   "verdict": "correct",
+   "note": "both: clicking the active tab does not focus the text area"
+  },
+  {
+   "n": 26,
+   "duplicate": 5880,
+   "original": 1280,
+   "verdict": "doubtful",
+   "note": "maintainer says 'tracking related work in'; one asks for a profile/password manager, the other for serial/ssh connection types; overlap is partial"
+  },
+  {
+   "n": 27,
+   "duplicate": 3352,
+   "original": 2634,
+   "verdict": "correct",
+   "note": "both: broadcast input to all tabs/panes"
+  },
+  {
+   "n": 28,
+   "duplicate": 3002,
+   "original": 1205,
+   "verdict": "correct",
+   "note": "symptom report matched by maintainer to the underlying focus-tracking work item; low text overlap"
+  },
+  {
+   "n": 29,
+   "duplicate": 4441,
+   "original": 715,
+   "verdict": "correct",
+   "note": "both: keyboard text selection"
+  },
+  {
+   "n": 30,
+   "duplicate": 7378,
+   "original": 376,
+   "verdict": "correct",
+   "note": "both: mouse input not passed to applications"
+  }
+ ]
+}

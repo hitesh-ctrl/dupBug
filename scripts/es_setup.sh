@@ -30,6 +30,9 @@ http.port: 9200
 # Local development only. Never expose this node to a network.
 xpack.security.enabled: false
 xpack.ml.enabled: false
+# Dev laptops are often >90% full; the default disk watermarks would block all shard allocation.
+# The whole index is a few tens of MB. Local development only.
+cluster.routing.allocation.disk.threshold_enabled: false
 YML
 mkdir -p "$ES_HOME/config/jvm.options.d"
 printf -- '-Xms1g\n-Xmx1g\n' > "$ES_HOME/config/jvm.options.d/heap.options"
