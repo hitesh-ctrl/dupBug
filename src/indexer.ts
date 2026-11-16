@@ -2,6 +2,7 @@ import { Client } from "@elastic/elasticsearch";
 import { createReadStream, existsSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
+import { loadFlags } from "./flags.js";
 import { cleanBody } from "./text.js";
 
 export interface IssueDoc {
@@ -14,6 +15,7 @@ export interface IssueDoc {
 
 /** Title and body use the built-in `english` analyzer (lowercase, stop words, Porter stemming). */
 export async function createIndex(client: Client, index: string): Promise<void> {
+  const analyzer = loadFlags().noStemming ? "standard" : "english";
   await client.indices.create({
     index,
     settings: { number_of_shards: 1, number_of_replicas: 0 },
@@ -21,8 +23,8 @@ export async function createIndex(client: Client, index: string): Promise<void> 
       dynamic: "strict",
       properties: {
         number: { type: "integer" },
-        title: { type: "text", analyzer: "english" },
-        body: { type: "text", analyzer: "english" },
+        title: { type: "text", analyzer },
+        body: { type: "text", analyzer },
         created_at: { type: "date" },
         url: { type: "keyword", index: false },
       },

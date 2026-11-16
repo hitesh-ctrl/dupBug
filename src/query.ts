@@ -1,4 +1,5 @@
 import type { SearchParams } from "./config.js";
+import { loadFlags } from "./flags.js";
 import { cleanBody } from "./text.js";
 
 export interface SimilarInput {
@@ -42,7 +43,8 @@ export function limitTerms(text: string, budget: number): string {
 export function buildQuery(input: SimilarInput, before: string, p: SearchParams): Record<string, unknown> {
   const title = input.title;
   const body = limitTerms(p.cleanBody ? cleanBody(input.body) : input.body, MAX_BODY_TERMS);
-  const titleMatch: Record<string, unknown> = { query: title, boost: p.titleBoost };
+  const flags = loadFlags();
+  const titleMatch: Record<string, unknown> = { query: title, boost: flags.noTitleBoost ? 1 : p.titleBoost };
   if (p.minimumShouldMatch) titleMatch.minimum_should_match = p.minimumShouldMatch;
 
   const should: Record<string, unknown>[] = [{ match: { title: titleMatch } }];
@@ -65,7 +67,7 @@ export function buildQuery(input: SimilarInput, before: string, p: SearchParams)
   }
   return {
     bool: {
-      filter: [{ range: { created_at: { lt: before } } }],
+      filter: flags.noTimeFilter ? [] : [{ range: { created_at: { lt: before } } }],
       should,
       minimum_should_match: 1,
     },
