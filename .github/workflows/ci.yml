@@ -1,0 +1,60 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.19.25
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+          cluster.routing.allocation.disk.threshold_enabled: "false"
+          ES_JAVA_OPTS: -Xms1g -Xmx1g
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd "curl -fs http://localhost:9200/_cluster/health"
+          --health-interval 10s --health-timeout 5s --health-retries 30
+    env:
+      ES_URL: http://127.0.0.1:9200
+      PYTHON: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - run: pip install -r requirements.txt
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests for metrics, pair extraction and gate
+        run: python -m pytest eval -q
+      - name: API tests (real Elasticsearch)
+        run: npm test
+      - name: Restore issue cache
+        uses: actions/cache@v4
+        with:
+          path: data/issues.jsonl
+          key: issues-${{ hashFiles('manifest/issues_manifest.json') }}
+      - name: Fetch issue text for the committed manifest (public data, not stored in the repo)
+        run: test -f data/issues.jsonl || python scripts/fetch_issues.py --from-manifest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Index
+        run: npm run index
+      - name: Evaluate (tuning and held-out pairs)
+        run: scripts/run_eval.sh --final
+      - name: Regression gate against results/baseline.json
+        run: python eval/gate.py

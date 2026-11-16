@@ -85,7 +85,17 @@ def main() -> None:
     ap.add_argument("--direction", default="asc", choices=["asc", "desc"],
                     help="asc = oldest issues first (window starts at the repository's first issue)")
     ap.add_argument("--count", type=int, default=8000)
+    ap.add_argument("--from-manifest", action="store_true",
+                    help="re-create data/issues.jsonl for exactly the issue numbers in the committed manifest "
+                         "(no comments, manifest not rewritten); used by CI and for clean re-installs")
+    ap.add_argument("--out-dir", default=str(DATA))
     args = ap.parse_args()
+    out_dir = Path(args.out_dir)
+    wanted: set[int] | None = None
+    if args.from_manifest:
+        m = json.loads((ROOT / "manifest" / "issues_manifest.json").read_text())
+        args.repo, args.direction, args.count = m["repository"], m["direction"], m["issue_count"]
+        wanted = set(m["issue_numbers"])
 
     s = requests.Session()
     s.headers.update(
@@ -96,8 +106,7 @@ def main() -> None:
             "User-Agent": "dup-finder-fetch",
         }
     )
-    DATA.mkdir(exist_ok=True)
-    (DATA / "comments").mkdir(exist_ok=True)
+    out_dir.mkdir(exist_ok=True, parents=True)
 
     issues: list[dict] = []
     url: str | None = f"{API}/repos/{args.repo}/issues"
@@ -110,6 +119,8 @@ def main() -> None:
         for it in r.json():
             if "pull_request" in it:
                 prs += 1
+                continue
+            if wanted is not None and it["number"] not in wanted:
                 continue
             issues.append(
                 {
@@ -127,15 +138,23 @@ def main() -> None:
         if pages % 10 == 0:
             print(f"page {pages}: {len(issues)} issues, {prs} PRs skipped", flush=True)
     issues = issues[: args.count]
-    with (DATA / "issues.jsonl").open("w") as f:
+    with (out_dir / "issues.jsonl").open("w") as f:
         for it in issues:
             f.write(json.dumps(it, ensure_ascii=False) + "\n")
     print(f"issues: {len(issues)} (pages {pages}, PRs skipped {prs})", flush=True)
 
+    if wanted is not None:
+        missing = wanted - {it["number"] for it in issues}
+        print(f"from manifest: {len(issues)} of {len(wanted)} issues found, {len(missing)} missing", flush=True)
+        if missing:
+            sys.exit(f"issues no longer available: {sorted(missing)[:20]}")
+        return
+
+    (out_dir / "comments").mkdir(exist_ok=True)
     cands = [it for it in issues if is_dup_candidate(it)]
     fetched = 0
     for i, it in enumerate(cands):
-        out = DATA / "comments" / f"{it['number']}.json"
+        out = out_dir / "comments" / f"{it['number']}.json"
         if out.exists():
             continue
         r = get(s, f"{API}/repos/{args.repo}/issues/{it['number']}/comments", {"per_page": 100})
