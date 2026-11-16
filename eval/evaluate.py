@@ -26,6 +26,9 @@ from metrics import percentile, summarize  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 NAIVE_INDEX = "issues_naive"
+# One keep-alive connection per host. Opening a new connection per request exhausted the local
+# ephemeral ports after a few back-to-back runs ("Can't assign requested address").
+HTTP = requests.Session()
 TITLE_MAX, BODY_MAX = 200, 5000
 
 
@@ -60,7 +63,7 @@ def ensure_naive_index(es: str, issues: dict[int, dict]) -> None:
 
 def query_service(api: str, dup: dict) -> tuple[list[int], float]:
     t0 = time.perf_counter()
-    r = requests.post(
+    r = HTTP.post(
         f"{api}/similar",
         params={"before": dup["created_at"]},
         json={"title": dup["title"][:TITLE_MAX], "body": dup["body"][:BODY_MAX]},
@@ -83,7 +86,7 @@ def query_naive(es: str, dup: dict) -> list[int]:
             }
         },
     }
-    r = requests.post(f"{es}/{NAIVE_INDEX}/_search", json=body, timeout=30)
+    r = HTTP.post(f"{es}/{NAIVE_INDEX}/_search", json=body, timeout=30)
     r.raise_for_status()
     return [int(h["_id"]) for h in r.json()["hits"]["hits"]]
 

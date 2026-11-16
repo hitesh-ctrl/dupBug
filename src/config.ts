@@ -6,6 +6,10 @@ export interface SearchParams {
   bodyWeight: number;
   /** Weight of matching the query title against stored bodies. */
   titleToBody: number;
+  /** Weight of matching the query body against stored titles (0 = off). */
+  bodyToTitle: number;
+  /** Strip HTML comments (template boilerplate) from the query body. */
+  cleanBody: boolean;
   /** minimum_should_match for the title match ("" = Elasticsearch default). */
   minimumShouldMatch: string;
   /** Adds a more_like_this clause over title and body. */
@@ -14,10 +18,13 @@ export interface SearchParams {
   mltMaxQueryTerms: number;
 }
 
+// Final values, chosen on the tuning pairs only (results/tuning_summary.json lists every run).
 export const DEFAULT_PARAMS: SearchParams = {
-  titleBoost: 1,
+  titleBoost: 4,
   bodyWeight: 1,
-  titleToBody: 1,
+  titleToBody: 3,
+  bodyToTitle: 1.5,
+  cleanBody: true,
   minimumShouldMatch: "",
   mlt: false,
   mltWeight: 1,

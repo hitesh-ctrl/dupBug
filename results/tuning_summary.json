@@ -1,0 +1,329 @@
+{
+ "note": "Every tuning run, in order. Tuning pairs only; held-out pairs were not evaluated in any of these runs. Runs 00-03 used an index with raw bodies; from 04 on bodies are stored without HTML comments.",
+ "runs": [
+  {
+   "run": "00_untuned",
+   "generated_at": "2026-11-16T21:21:10Z",
+   "params": "untuned: all weights 1",
+   "n": 1320,
+   "hit_at_5": 0.1795,
+   "hit_at_10": 0.2189,
+   "mrr": 0.126
+  },
+  {
+   "run": "01_titleBoost_2",
+   "generated_at": "2026-11-16T21:21:34Z",
+   "params": "{\"titleBoost\":2}",
+   "n": 1320,
+   "hit_at_5": 0.1871,
+   "hit_at_10": 0.2348,
+   "mrr": 0.1314
+  },
+  {
+   "run": "01_titleBoost_4",
+   "generated_at": "2026-11-16T21:21:42Z",
+   "params": "{\"titleBoost\":4}",
+   "n": 1320,
+   "hit_at_5": 0.1977,
+   "hit_at_10": 0.2538,
+   "mrr": 0.1368
+  },
+  {
+   "run": "01_titleBoost_8",
+   "generated_at": "2026-11-16T21:21:48Z",
+   "params": "{\"titleBoost\":8}",
+   "n": 1320,
+   "hit_at_5": 0.2008,
+   "hit_at_10": 0.2545,
+   "mrr": 0.1325
+  },
+  {
+   "run": "02_bodyWeight_0.5",
+   "generated_at": "2026-11-16T21:21:55Z",
+   "params": "{\"bodyWeight\":0.5}",
+   "n": 1320,
+   "hit_at_5": 0.1947,
+   "hit_at_10": 0.2348,
+   "mrr": 0.1358
+  },
+  {
+   "run": "02_bodyWeight_0.2",
+   "generated_at": "2026-11-16T21:22:03Z",
+   "params": "{\"bodyWeight\":0.2}",
+   "n": 1320,
+   "hit_at_5": 0.203,
+   "hit_at_10": 0.2636,
+   "mrr": 0.1397
+  },
+  {
+   "run": "02_bodyWeight_0",
+   "generated_at": "2026-11-16T21:22:10Z",
+   "params": "{\"bodyWeight\":0}",
+   "n": 1320,
+   "hit_at_5": 0.2371,
+   "hit_at_10": 0.3129,
+   "mrr": 0.1596
+  },
+  {
+   "run": "03_titleToBody_0",
+   "generated_at": "2026-11-16T21:22:16Z",
+   "params": "{\"titleToBody\":0}",
+   "n": 1320,
+   "hit_at_5": 0.1652,
+   "hit_at_10": 0.2053,
+   "mrr": 0.1147
+  },
+  {
+   "run": "04_cleanIndex_only",
+   "generated_at": "2026-11-16T21:23:02Z",
+   "params": "{}",
+   "n": 1320,
+   "hit_at_5": 0.1674,
+   "hit_at_10": 0.2212,
+   "mrr": 0.119
+  },
+  {
+   "run": "04_clean_both",
+   "generated_at": "2026-11-16T21:23:08Z",
+   "params": "{\"cleanBody\":true}",
+   "n": 1320,
+   "hit_at_5": 0.2606,
+   "hit_at_10": 0.3432,
+   "mrr": 0.1808
+  },
+  {
+   "run": "04_clean_tb4",
+   "generated_at": "2026-11-16T21:23:12Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4}",
+   "n": 1320,
+   "hit_at_5": 0.2826,
+   "hit_at_10": 0.3591,
+   "mrr": 0.1839
+  },
+  {
+   "run": "04_clean_tb4_bw0.5",
+   "generated_at": "2026-11-16T21:23:16Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyWeight\":0.5}",
+   "n": 1320,
+   "hit_at_5": 0.272,
+   "hit_at_10": 0.3508,
+   "mrr": 0.18
+  },
+  {
+   "run": "04_clean_tb4_bw0",
+   "generated_at": "2026-11-16T21:23:21Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyWeight\":0}",
+   "n": 1320,
+   "hit_at_5": 0.2265,
+   "hit_at_10": 0.297,
+   "mrr": 0.1494
+  },
+  {
+   "run": "05_tb2",
+   "generated_at": "2026-11-16T21:23:40Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":2}",
+   "n": 1320,
+   "hit_at_5": 0.272,
+   "hit_at_10": 0.3583,
+   "mrr": 0.1839
+  },
+  {
+   "run": "05_tb3",
+   "generated_at": "2026-11-16T21:23:44Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":3}",
+   "n": 1320,
+   "hit_at_5": 0.2811,
+   "hit_at_10": 0.3614,
+   "mrr": 0.1825
+  },
+  {
+   "run": "05_tb6",
+   "generated_at": "2026-11-16T21:23:49Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":6}",
+   "n": 1320,
+   "hit_at_5": 0.2773,
+   "hit_at_10": 0.3523,
+   "mrr": 0.1814
+  },
+  {
+   "run": "05_tb4_bw2",
+   "generated_at": "2026-11-16T21:23:53Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyWeight\":2}",
+   "n": 1320,
+   "hit_at_5": 0.2659,
+   "hit_at_10": 0.353,
+   "mrr": 0.1792
+  },
+  {
+   "run": "05_tb4_t2b0",
+   "generated_at": "2026-11-16T21:23:58Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"titleToBody\":0}",
+   "n": 1320,
+   "hit_at_5": 0.275,
+   "hit_at_10": 0.3561,
+   "mrr": 0.1783
+  },
+  {
+   "run": "05_tb4_t2b2",
+   "generated_at": "2026-11-16T21:24:03Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"titleToBody\":2}",
+   "n": 1320,
+   "hit_at_5": 0.2803,
+   "hit_at_10": 0.3674,
+   "mrr": 0.1857
+  },
+  {
+   "run": "05_tb4_b2t1",
+   "generated_at": "2026-11-16T21:24:12Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":1}",
+   "n": 1320,
+   "hit_at_5": 0.2886,
+   "hit_at_10": 0.3659,
+   "mrr": 0.1924
+  },
+  {
+   "run": "05_tb4_b2t2",
+   "generated_at": "2026-11-16T21:24:17Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":2}",
+   "n": 1320,
+   "hit_at_5": 0.2803,
+   "hit_at_10": 0.3636,
+   "mrr": 0.1843
+  },
+  {
+   "run": "05_tb4_msm30",
+   "generated_at": "2026-11-16T21:24:22Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"minimumShouldMatch\":\"30%\"}",
+   "n": 1320,
+   "hit_at_5": 0.2758,
+   "hit_at_10": 0.3583,
+   "mrr": 0.1765
+  },
+  {
+   "run": "05_tb4_msm50",
+   "generated_at": "2026-11-16T21:24:26Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"minimumShouldMatch\":\"50%\"}",
+   "n": 1320,
+   "hit_at_5": 0.2682,
+   "hit_at_10": 0.3492,
+   "mrr": 0.1755
+  },
+  {
+   "run": "05_tb4_mlt",
+   "generated_at": "2026-11-16T21:24:31Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"mlt\":true}",
+   "n": 1320,
+   "hit_at_5": 0.2667,
+   "hit_at_10": 0.3553,
+   "mrr": 0.179
+  },
+  {
+   "run": "05_tb4_mlt_w3",
+   "generated_at": "2026-11-16T21:24:37Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"mlt\":true,\"mltWeight\":3}",
+   "n": 1320,
+   "hit_at_5": 0.2409,
+   "hit_at_10": 0.3159,
+   "mrr": 0.1611
+  },
+  {
+   "run": "05_tb4_mlt_50",
+   "generated_at": "2026-11-16T21:24:42Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"mlt\":true,\"mltMaxQueryTerms\":50}",
+   "n": 1320,
+   "hit_at_5": 0.2455,
+   "hit_at_10": 0.3326,
+   "mrr": 0.1711
+  },
+  {
+   "run": "05_tb4_t2b4",
+   "generated_at": "2026-11-16T21:25:27Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"titleToBody\":4}",
+   "n": 1320,
+   "hit_at_5": 0.2795,
+   "hit_at_10": 0.3705,
+   "mrr": 0.1846
+  },
+  {
+   "run": "05_tb4_b2t0.5",
+   "generated_at": "2026-11-16T21:25:32Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":0.5}",
+   "n": 1320,
+   "hit_at_5": 0.2902,
+   "hit_at_10": 0.3659,
+   "mrr": 0.1882
+  },
+  {
+   "run": "06_b2t1_t2b2",
+   "generated_at": "2026-11-16T21:25:37Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":1,\"titleToBody\":2}",
+   "n": 1320,
+   "hit_at_5": 0.2962,
+   "hit_at_10": 0.3712,
+   "mrr": 0.1937
+  },
+  {
+   "run": "06_b2t1_t2b2_bw0.5",
+   "generated_at": "2026-11-16T21:25:41Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":1,\"titleToBody\":2,\"bodyWeight\":0.5}",
+   "n": 1320,
+   "hit_at_5": 0.2864,
+   "hit_at_10": 0.3629,
+   "mrr": 0.1906
+  },
+  {
+   "run": "06_b2t1_t2b2_tb6",
+   "generated_at": "2026-11-16T21:25:46Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":6,\"bodyToTitle\":1,\"titleToBody\":2}",
+   "n": 1320,
+   "hit_at_5": 0.2856,
+   "hit_at_10": 0.3644,
+   "mrr": 0.1907
+  },
+  {
+   "run": "06_b2t1.5_t2b3",
+   "generated_at": "2026-11-16T21:25:51Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":1.5,\"titleToBody\":3}",
+   "n": 1320,
+   "hit_at_5": 0.2955,
+   "hit_at_10": 0.3788,
+   "mrr": 0.1967
+  },
+  {
+   "run": "06_b2t1_t2b2_mlt0.5",
+   "generated_at": "2026-11-16T21:25:56Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":1,\"titleToBody\":2,\"mlt\":true,\"mltWeight\":0.5}",
+   "n": 1320,
+   "hit_at_5": 0.2894,
+   "hit_at_10": 0.378,
+   "mrr": 0.1924
+  },
+  {
+   "run": "06_b2t1_t2b2_mltOnly",
+   "generated_at": "2026-11-16T21:26:02Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":1,\"titleToBody\":2,\"mlt\":true,\"bodyWeight\":0}",
+   "n": 1320,
+   "hit_at_5": 0.2735,
+   "hit_at_10": 0.3606,
+   "mrr": 0.1883
+  },
+  {
+   "run": "06_b2t1_t2b2_msm20",
+   "generated_at": "2026-11-16T21:26:06Z",
+   "params": "{\"cleanBody\":true,\"titleBoost\":4,\"bodyToTitle\":1,\"titleToBody\":2,\"minimumShouldMatch\":\"20%\"}",
+   "n": 1320,
+   "hit_at_5": 0.2947,
+   "hit_at_10": 0.3682,
+   "mrr": 0.1931
+  },
+  {
+   "run": "07_final_defaults",
+   "generated_at": "2026-11-16T21:26:32Z",
+   "params": "{}",
+   "n": 1320,
+   "hit_at_5": 0.2955,
+   "hit_at_10": 0.3788,
+   "mrr": 0.1967
+  }
+ ]
+}

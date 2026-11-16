@@ -1,4 +1,5 @@
 import type { SearchParams } from "./config.js";
+import { cleanBody } from "./text.js";
 
 export interface SimilarInput {
   title: string;
@@ -40,16 +41,15 @@ export function limitTerms(text: string, budget: number): string {
  */
 export function buildQuery(input: SimilarInput, before: string, p: SearchParams): Record<string, unknown> {
   const title = input.title;
-  const body = limitTerms(input.body, MAX_BODY_TERMS);
+  const body = limitTerms(p.cleanBody ? cleanBody(input.body) : input.body, MAX_BODY_TERMS);
   const titleMatch: Record<string, unknown> = { query: title, boost: p.titleBoost };
   if (p.minimumShouldMatch) titleMatch.minimum_should_match = p.minimumShouldMatch;
 
-  const should: Record<string, unknown>[] = [
-    { match: { title: titleMatch } },
-    { match: { body: { query: title, boost: p.titleToBody } } },
-  ];
+  const should: Record<string, unknown>[] = [{ match: { title: titleMatch } }];
+  if (p.titleToBody > 0) should.push({ match: { body: { query: title, boost: p.titleToBody } } });
   if (body.trim().length > 0) {
-    should.push({ match: { body: { query: body, boost: p.bodyWeight } } });
+    if (p.bodyWeight > 0) should.push({ match: { body: { query: body, boost: p.bodyWeight } } });
+    if (p.bodyToTitle > 0) should.push({ match: { title: { query: body, boost: p.bodyToTitle } } });
   }
   if (p.mlt) {
     should.push({

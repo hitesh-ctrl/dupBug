@@ -2,6 +2,7 @@ import { Client } from "@elastic/elasticsearch";
 import { createReadStream, existsSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
+import { cleanBody } from "./text.js";
 
 export interface IssueDoc {
   number: number;
@@ -29,12 +30,29 @@ export async function createIndex(client: Client, index: string): Promise<void> 
   });
 }
 
-export async function bulkIndex(client: Client, index: string, docs: IssueDoc[]): Promise<void> {
+export interface IndexOptions {
+  /** Strip HTML comments (template boilerplate) from bodies. Tuning step 2; on by default. */
+  cleanBodies?: boolean;
+}
+
+export async function bulkIndex(
+  client: Client,
+  index: string,
+  docs: IssueDoc[],
+  opts: IndexOptions = {},
+): Promise<void> {
+  const clean = opts.cleanBodies ?? true;
   const CHUNK = 500;
   for (let i = 0; i < docs.length; i += CHUNK) {
     const operations = docs.slice(i, i + CHUNK).flatMap((d) => [
       { index: { _index: index, _id: String(d.number) } },
-      { number: d.number, title: d.title, body: d.body, created_at: d.created_at, url: d.url },
+      {
+        number: d.number,
+        title: d.title,
+        body: clean ? cleanBody(d.body) : d.body,
+        created_at: d.created_at,
+        url: d.url,
+      },
     ]);
     const res = await client.bulk({ operations });
     if (res.errors) {
@@ -60,7 +78,7 @@ async function main(): Promise<void> {
   const docs = await readIssues(path);
   await client.indices.delete({ index }, { ignore: [404] });
   await createIndex(client, index);
-  await bulkIndex(client, index, docs);
+  await bulkIndex(client, index, docs, { cleanBodies: process.env.RAW_BODIES !== "1" });
   await client.indices.refresh({ index });
   const { count } = await client.count({ index });
   console.log(`indexed ${count} issues into "${index}"`);
