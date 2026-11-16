@@ -1,0 +1,72 @@
+{
+ "first_pass": {
+  "caught": 3,
+  "total": 3,
+  "bugs": [
+   {
+    "bug": "BUG_NO_TITLE_BOOST",
+    "caught_by": [
+     "gate"
+    ],
+    "tuning_mrr_change": -0.0061,
+    "gate_problem_count": 62
+   },
+   {
+    "bug": "BUG_NO_STEMMING",
+    "caught_by": [
+     "gate"
+    ],
+    "tuning_mrr_change": -0.0114,
+    "gate_problem_count": 114
+   },
+   {
+    "bug": "BUG_NO_TIME_FILTER",
+    "caught_by": [
+     "api_tests",
+     "evaluation"
+    ],
+    "tuning_mrr_change": null,
+    "gate_problem_count": 0
+   }
+  ]
+ },
+ "final": {
+  "caught": 3,
+  "total": 3,
+  "bugs": [
+   {
+    "bug": "BUG_NO_TITLE_BOOST",
+    "caught_by": [
+     "api_tests",
+     "gate"
+    ],
+    "api_tests_failed": [
+     "buildQuery > boosts the title-to-title match above every other clause"
+    ]
+   },
+   {
+    "bug": "BUG_NO_STEMMING",
+    "caught_by": [
+     "api_tests",
+     "gate"
+    ],
+    "api_tests_failed": [
+     "POST /similar: stemming > matches different word forms (flickering scrollbars resized -> scrollbar flickers while resizing)"
+    ]
+   },
+   {
+    "bug": "BUG_NO_TIME_FILTER",
+    "caught_by": [
+     "api_tests",
+     "evaluation"
+    ],
+    "api_tests_failed": [
+     "POST /similar: no looking into the future > holds for every fixture issue used as the query",
+     "POST /similar: no looking into the future > never returns an issue created at or after the query issue, nor the issue itself",
+     "POST /similar: no looking into the future > the oldest issue has nothing before it",
+     "buildQuery > always filters on created_at strictly before the cutoff"
+    ]
+   }
+  ]
+ }
+}

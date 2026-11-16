@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-16T21:26:54Z",
+ "generated_at": "2026-11-16T21:35:00Z",
  "repository": "microsoft/terminal",
  "note": "final tuned state",
  "top_k": 10,
@@ -18918,7 +18918,7 @@
  "latency_ms_local": {
   "n": 1886,
   "p50": 2.8,
-  "p95": 5.6,
+  "p95": 5.5,
   "note": "client-side, localhost, sequential requests; not a network measurement"
  }
 }
