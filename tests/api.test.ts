@@ -41,7 +41,10 @@ describe("POST /similar: response shape", () => {
     }
     const scores = res.body.results.map((r: { score: number }) => r.score);
     expect(scores).toEqual([...scores].sort((a, b) => b - a));
-    expect(res.body.results[0].number).toBe(1);
+    // Issues 1, 3, 5 and 7 describe the same paste crash with near-identical stemmed terms, so which of
+    // them is first depends on length normalisation. The top hit must be one of them, not an unrelated issue.
+    expect([1, 3, 5, 7]).toContain(res.body.results[0].number);
+    expect(res.body.results.map((r: { number: number }) => r.number)).toContain(1);
   });
 
   it("accepts a missing body and an empty body", async () => {
@@ -78,6 +81,24 @@ describe("POST /similar: validation", () => {
       .post("/similar")
       .send({ title: "a".repeat(200), body: "b".repeat(5000) });
     expect(res.status).toBe(200);
+  });
+
+  it("counts characters, not UTF-16 units (emoji at the limit)", async () => {
+    const ok = await request(app).post("/similar").send({ title: "🚨".repeat(200), body: "🚨".repeat(5000) });
+    expect(ok.status).toBe(200);
+    const tooLong = await request(app).post("/similar").send({ title: "🚨".repeat(201) });
+    expect(tooLong.status).toBe(400);
+    const bodyTooLong = await request(app).post("/similar").send({ title: "ok", body: "🚨".repeat(5001) });
+    expect(bodyTooLong.status).toBe(400);
+  });
+
+  it("handles maximum-size input where every character is its own term (CJK, emoji)", async () => {
+    for (const ch of ["漢", "🚨", "a "]) {
+      const res = await request(app)
+        .post("/similar")
+        .send({ title: ch.repeat(200).slice(0, 200), body: ch.repeat(5000).slice(0, 5000) });
+      expect(res.status).toBe(200);
+    }
   });
 
   it("rejects malformed JSON with a clean 400", async () => {
