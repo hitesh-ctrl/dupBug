@@ -132,7 +132,12 @@ for (const ex of EXAMPLES) {
   const li = document.createElement("li");
   const b = document.createElement("button");
   b.type = "button"; b.textContent = ex.title;
-  b.addEventListener("click", () => { titleEl.value = ex.title; bodyEl.value = ex.body; updateCounts(); form.requestSubmit(); });
+  // A sample only fills in the form; nothing is searched until Search is pressed.
+  b.addEventListener("click", () => {
+    titleEl.value = ex.title; bodyEl.value = ex.body; updateCounts();
+    render([]); setStatus("Sample loaded. Press Search to run it.");
+    submit.focus();
+  });
   li.appendChild(b); $("examples").appendChild(li);
 }
 
