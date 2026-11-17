@@ -63,6 +63,17 @@ interface IssueSource {
 export function createApp({ client, index, params = DEFAULT_PARAMS, rateLimitPerMin = 0 }: AppDeps): Express {
   const app = express();
   app.disable("x-powered-by");
+  app.use((_req, res, next) => {
+    res.set({
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "Referrer-Policy": "no-referrer",
+      // The page has one inline script and style block and talks only to this origin.
+      "Content-Security-Policy":
+        "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+    });
+    next();
+  });
   app.use(express.json({ limit: "64kb" }));
 
   app.get("/health", async (_req, res) => {

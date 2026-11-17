@@ -3,21 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>Duplicate Report Finder</title>
 <style>
   :root {
     --bg: #f7f8fa; --card: #ffffff; --ink: #0f172a; --ink-2: #475569; --ink-3: #94a3b8;
     --line: #e2e8f0; --line-2: #eef2f6; --accent: #0f766e; --accent-hover: #0d5f59; --accent-ink: #ffffff;
-    --accent-soft: #e6f4f2; --field: #ffffff; --err: #b91c1c; --err-soft: #fef2f2; --track: #e2e8f0;
-    --shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 8px 24px rgba(15, 23, 42, .06);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0b0f14; --card: #131920; --ink: #e8edf3; --ink-2: #a3afbd; --ink-3: #66727f;
-      --line: #232c37; --line-2: #1b222b; --accent: #2dd4bf; --accent-hover: #5eead4; --accent-ink: #04201d;
-      --accent-soft: #10302d; --field: #0e1318; --err: #fca5a5; --err-soft: #331517; --track: #232c37;
-      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
-    }
+    --accent-soft: #e6f4f2; --field: #ffffff; --err: #b91c1c; --err-soft: #fef2f2;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -27,15 +19,12 @@
 
   nav { flex: none; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
         padding: 0 24px; background: var(--card); border-bottom: 1px solid var(--line); }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; font-size: 15px; letter-spacing: -.01em; }
-  .mark { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; }
-  .mark svg { width: 15px; height: 15px; stroke: var(--accent-ink); fill: none; stroke-width: 2.2; stroke-linecap: round; }
-  .pill { font-size: 12px; color: var(--ink-2); background: var(--bg); border: 1px solid var(--line);
-          padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .brand { font-weight: 650; font-size: 15px; letter-spacing: -.01em; }
+  .source { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
 
   main { flex: 1; min-height: 0; display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px;
          padding: 20px 24px; max-width: 1280px; width: 100%; margin: 0 auto; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
           min-height: 0; display: flex; flex-direction: column; }
   .card-head { flex: none; padding: 16px 20px 0; }
   .card-head h1, .card-head h2 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
@@ -46,14 +35,14 @@
   label { font-weight: 550; font-size: 13px; }
   .count { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
   input, textarea { display: block; width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px;
-                    background: var(--field); color: var(--ink); font: inherit; transition: border-color .12s, box-shadow .12s; }
+                    background: var(--field); color: var(--ink); font: inherit; }
   textarea { height: 104px; resize: none; }
   input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   ::placeholder { color: var(--ink-3); opacity: 1; }
   button { font: inherit; cursor: pointer; }
   button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   #submit { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 9px; padding: 10px 16px;
-            font-weight: 600; transition: background .12s; }
+            font-weight: 600; }
   #submit:hover:not(:disabled) { background: var(--accent-hover); }
   #submit:disabled { opacity: .6; cursor: default; }
 
@@ -62,7 +51,7 @@
   .samples ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
   .samples button { width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--line); color: var(--ink-2);
                     border-radius: 8px; padding: 7px 10px; font-size: 12.5px; white-space: nowrap; overflow: hidden;
-                    text-overflow: ellipsis; transition: border-color .12s, color .12s; }
+                    text-overflow: ellipsis; }
   .samples button:hover { border-color: var(--accent); color: var(--ink); }
 
   .results-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 12px;
@@ -79,10 +68,9 @@
   #results { flex: 1; min-height: 0; list-style: none; margin: 0; padding: 4px 8px; display: grid;
              grid-template-rows: repeat(10, minmax(0, 1fr)); }
   #results[hidden] { display: none; }
-  #results li { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px 92px 118px; align-items: center; gap: 12px;
+  #results li { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px 92px 44px; align-items: center; gap: 12px;
                 padding: 0 12px; border-radius: 9px; min-height: 0; }
   #results li + li { border-top: 1px solid var(--line-2); }
-  #results li:hover { background: var(--bg); }
   .rank { width: 24px; height: 24px; border-radius: 7px; background: var(--bg); border: 1px solid var(--line);
           display: grid; place-items: center; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
   li.best .rank { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 650; }
@@ -90,11 +78,11 @@
            font-weight: 550; text-decoration: none; }
   a.title:hover { color: var(--accent); }
   .num, .date { color: var(--ink-2); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .rel { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
-  .meter { flex: 1; height: 5px; background: var(--track); border-radius: 3px; overflow: hidden; }
-  .meter span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
-  .pct { width: 34px; text-align: right; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .pct { text-align: right; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
+  .cols { flex: none; display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px 92px 44px; gap: 12px;
+          padding: 8px 20px 0; color: var(--ink-3); font-size: 11.5px; }
+  .cols[hidden] { display: none; }
   .foot { flex: none; padding: 10px 20px; border-top: 1px solid var(--line-2); color: var(--ink-3); font-size: 11.5px; }
 
   @media (max-width: 900px) {
@@ -102,7 +90,7 @@
     main { grid-template-columns: minmax(0, 1fr); padding: 16px; }
     nav { padding: 0 16px; }
     #results { grid-template-rows: none; grid-auto-rows: 48px; }
-    #results li { grid-template-columns: 28px minmax(0, 1fr) 56px 84px; }
+    #results li, .cols { grid-template-columns: 28px minmax(0, 1fr) 56px 44px; }
     .date { display: none; }
     #empty { min-height: 160px; }
     .results-head { flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -115,11 +103,8 @@
 </head>
 <body>
 <nav>
-  <div class="brand">
-    <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span>
-    Duplicate Report Finder
-  </div>
-  <span class="pill">microsoft/terminal &middot; 8,000 issues</span>
+  <div class="brand">Duplicate Report Finder</div>
+  <span class="source">Searching 8,000 issues from microsoft/terminal</span>
 </nav>
 
 <main>
@@ -130,11 +115,11 @@
     </div>
     <form id="form" novalidate>
       <div>
-        <div class="label-row"><label for="title">Title</label><span class="count" id="title-count">0 / 200</span></div>
+        <div class="label-row"><label for="title">Title</label></div>
         <input id="title" maxlength="200" required autocomplete="off" placeholder="Short summary of the problem">
       </div>
       <div>
-        <div class="label-row"><label for="body">Description <span class="count">optional</span></label><span class="count" id="body-count">0 / 5,000</span></div>
+        <div class="label-row"><label for="body">Description</label><span class="count">optional</span></div>
         <textarea id="body" maxlength="5000" placeholder="What happened and how to reproduce it"></textarea>
       </div>
       <button id="submit" type="submit">Search</button>
@@ -151,8 +136,9 @@
       <span id="status" role="status" aria-live="polite"></span>
     </div>
     <div id="empty"><div><strong>No search yet</strong>Enter a report or pick a sample, then press Search.</div></div>
+    <div class="cols" id="cols" hidden><span></span><span>Report</span><span>Issue</span><span class="date">Opened</span><span class="pct">Match</span></div>
     <ol id="results" hidden></ol>
-    <div class="foot">Keyword search on Elasticsearch. Relevance is relative to the best match, not a probability of being a duplicate. Measured accuracy is in the project README.</div>
+    <div class="foot">Match is each result's score relative to the top result, not the probability that it is a duplicate.</div>
   </section>
 </main>
 
@@ -167,12 +153,6 @@ const $ = (id) => document.getElementById(id);
 const form = $("form"), statusEl = $("status"), list = $("results"), empty = $("empty"), submit = $("submit");
 const titleEl = $("title"), bodyEl = $("body");
 
-function updateCounts() {
-  $("title-count").textContent = titleEl.value.length + " / 200";
-  $("body-count").textContent = bodyEl.value.length.toLocaleString("en-US") + " / 5,000";
-}
-titleEl.addEventListener("input", updateCounts);
-bodyEl.addEventListener("input", updateCounts);
 
 function setStatus(text, isError) {
   statusEl.textContent = text;
@@ -183,7 +163,7 @@ function setEmpty(heading, text) {
   const strong = document.createElement("strong"); strong.textContent = heading;
   wrap.append(strong, document.createTextNode(text));
   empty.replaceChildren(wrap);
-  empty.hidden = false; list.hidden = true; list.replaceChildren();
+  empty.hidden = false; list.hidden = true; $("cols").hidden = true; list.replaceChildren();
 }
 function span(cls, text) {
   const el = document.createElement("span"); el.className = cls;
@@ -197,7 +177,7 @@ for (const ex of EXAMPLES) {
   b.type = "button"; b.textContent = ex.title; b.title = ex.title;
   // A sample only fills in the form; nothing is searched until Search is pressed.
   b.addEventListener("click", () => {
-    titleEl.value = ex.title; bodyEl.value = ex.body; updateCounts();
+    titleEl.value = ex.title; bodyEl.value = ex.body;
     setStatus(""); setEmpty("Sample loaded", "Press Search to run it.");
     submit.focus();
   });
@@ -215,16 +195,12 @@ function render(results) {
     const title = document.createElement(linked ? "a" : "span");
     title.className = "title"; title.textContent = r.title; title.title = r.title;
     if (linked) { title.href = r.url; title.target = "_blank"; title.rel = "noopener noreferrer"; }
-    const pct = Math.round(100 * r.score / top);
-    const rel = span("rel");
-    const meter = span("meter"); const fill = document.createElement("span"); fill.style.width = pct + "%";
-    meter.appendChild(fill);
-    rel.append(meter, span("pct", pct + "%"));
     li.append(span("rank", String(i + 1)), title, span("num", "#" + r.number),
-              span("date", String(r.created_at).slice(0, 10)), rel);
+              span("date", String(r.created_at).slice(0, 10)),
+              span("pct", Math.round(100 * r.score / top) + "%"));
     list.appendChild(li);
   });
-  empty.hidden = true; list.hidden = false;
+  empty.hidden = true; list.hidden = false; $("cols").hidden = false;
 }
 
 form.addEventListener("submit", async (e) => {
@@ -259,7 +235,6 @@ form.addEventListener("submit", async (e) => {
     submit.disabled = false; submit.textContent = "Search";
   }
 });
-updateCounts();
 </script>
 </body>
 </html>

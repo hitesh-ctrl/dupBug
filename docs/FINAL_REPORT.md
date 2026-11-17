@@ -65,7 +65,8 @@ tuning pairs (`results/failures.json`). Held-out results are lower than tuning r
   hand in a browser (all four sample reports, light and dark, phone width) and by one API test; it has no automated
   browser tests. It changes nothing in the search or the measured numbers.
 - Optional settings for public hosting: `HOST`, `RATE_LIMIT_PER_MIN` (per-client limit on `POST /similar`, off by default,
-  one API test) and `TRUST_PROXY`. No hosted deployment has been tested.
+  one API test), `TRUST_PROXY`, security response headers, and a VM setup script with a guide (`deploy/setup_vm.sh`,
+  `docs/DEPLOY.md`). The script was only syntax-checked; no hosted deployment has been tested.
 - A fresh `git clone` was run end to end (install, tests, fetch from manifest, index, evaluation, gate): per-pair results
   matched the baseline.
 

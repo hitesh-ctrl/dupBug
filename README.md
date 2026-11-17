@@ -33,6 +33,7 @@ and was not tested is in [docs/FINAL_REPORT.md](docs/FINAL_REPORT.md).
 | `public/` | static demo page (plain HTML and JavaScript, calls `POST /similar`) |
 | `tests/` | API tests (vitest + supertest) against a real Elasticsearch, with synthetic fixtures |
 | `eval/` | pair extraction (`pairs.py`), evaluation (`evaluate.py`), regression gate (`gate.py`), unit tests (`test_eval.py`) |
+| `deploy/` | one-time setup script for a small Ubuntu VM |
 | `scripts/` | Elasticsearch setup/start/stop, issue fetch, evaluation and tuning runners, planted-bug runner, README renderer |
 | `manifest/` | issue numbers and duplicate pairs (numbers only, no issue text) |
 | `results/` | measured numbers (`metrics.json`, `baseline.json`, `failures.json`, ...) |
@@ -97,6 +98,8 @@ Rebuilding the ground truth from scratch (needs issue comments, about 2,700 API 
 `scripts/fetch_issues.py` (without `--from-manifest`), then `eval/pairs.py`.
 
 CI (`.github/workflows/ci.yml`) runs the same steps on GitHub Actions with Elasticsearch as a service container.
+
+To put the page online on a free VM, see [docs/DEPLOY.md](docs/DEPLOY.md) (written, not yet exercised on a real VM).
 
 ## Data
 

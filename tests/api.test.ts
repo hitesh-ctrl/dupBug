@@ -162,6 +162,9 @@ describe("demo page", () => {
     expect(page.status).toBe(200);
     expect(page.headers["content-type"]).toMatch(/text\/html/);
     expect(page.text).toContain("Duplicate Report Finder");
+    expect(page.headers["x-content-type-options"]).toBe("nosniff");
+    expect(page.headers["x-frame-options"]).toBe("DENY");
+    expect(page.headers["content-security-policy"]).toContain("default-src 'none'");
     const missing = await request(app).get("/nope");
     expect(missing.status).toBe(404);
     expect(missing.body).toEqual({ error: "not_found" });
