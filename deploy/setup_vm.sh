@@ -22,7 +22,10 @@ grep -q '^GITHUB_TOKEN=..' .env 2>/dev/null || { echo "put GITHUB_TOKEN into .en
 
 echo "== 1/7 system packages"
 sudo apt-get update -y
-sudo apt-get install -y curl git xz-utils python3 python3-venv perl iptables-persistent
+# iptables-persistent asks two yes/no questions during install; answer them up front so the script never hangs.
+echo "iptables-persistent iptables-persistent/autosave_v4 boolean true" | sudo debconf-set-selections
+echo "iptables-persistent iptables-persistent/autosave_v6 boolean true" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl git xz-utils python3 python3-venv perl iptables-persistent
 
 echo "== 2/7 Node $NODE_VERSION"
 case "$(uname -m)" in
