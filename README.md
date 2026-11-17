@@ -13,7 +13,7 @@ the project's own maintainers.
 ![Elasticsearch 8](https://img.shields.io/badge/Elasticsearch-8.19-005571?logo=elasticsearch&logoColor=white)
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 
-<img src="docs/assets/demo.gif" alt="Typing a bug report and getting the ten most similar existing issues" width="900">
+<img src="docs/assets/demo.gif" alt="Typing a bug report, getting the ten most similar existing issues, and opening the top match on GitHub" width="900">
 
 </div>
 
