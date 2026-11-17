@@ -6,110 +6,104 @@
 <meta name="color-scheme" content="light">
 <title>Duplicate Report Finder</title>
 <style>
+  /* Colours, type and spacing follow GitHub's Primer light theme. */
   :root {
-    --bg: #f7f8fa; --card: #ffffff; --ink: #0f172a; --ink-2: #475569; --ink-3: #94a3b8;
-    --line: #e2e8f0; --line-2: #eef2f6; --accent: #0f766e; --accent-hover: #0d5f59; --accent-ink: #ffffff;
-    --accent-soft: #e6f4f2; --field: #ffffff; --err: #b91c1c; --err-soft: #fef2f2;
+    --fg: #1f2328; --muted: #59636e; --border: #d1d9e0; --border-muted: #dfe5ea; --canvas: #ffffff; --subtle: #f6f8fa;
+    --link: #0969da; --green: #1f883d; --green-hover: #1c8139; --open: #1a7f37; --danger: #d1242f;
+    --counter: #e6eaef; --focus: #0969da;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
-  body { margin: 0; background: var(--bg); color: var(--ink); display: flex; flex-direction: column;
-         font: 14px/1.45 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-         -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: var(--canvas); color: var(--fg); display: flex; flex-direction: column;
+         font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; }
 
-  nav { flex: none; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-        padding: 0 24px; background: var(--card); border-bottom: 1px solid var(--line); }
-  .brand { font-weight: 650; font-size: 15px; letter-spacing: -.01em; }
-  .source { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+  nav { flex: none; min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 8px 24px; background: var(--subtle); border-bottom: 1px solid var(--border); }
+  .brand { font-weight: 600; font-size: 14px; white-space: nowrap; }
+  .source { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
-  main { flex: 1; min-height: 0; display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px;
-         padding: 20px 24px; max-width: 1280px; width: 100%; margin: 0 auto; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-          min-height: 0; display: flex; flex-direction: column; }
-  .card-head { flex: none; padding: 16px 20px 0; }
-  .card-head h1, .card-head h2 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
-  .card-head p { margin: 4px 0 0; color: var(--ink-2); font-size: 13px; }
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 24px;
+         padding: 24px; max-width: 1280px; width: 100%; margin: 0 auto; }
+  .box { border: 1px solid var(--border); border-radius: 6px; background: var(--canvas); min-height: 0;
+         display: flex; flex-direction: column; overflow: hidden; }
+  .box-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+              padding: 12px 16px; background: var(--subtle); border-bottom: 1px solid var(--border); }
+  .box-head h1, .box-head h2 { margin: 0; font-size: 14px; font-weight: 600; }
+  #status { color: var(--muted); font-size: 12px; text-align: right; min-width: 0; }
 
-  form { padding: 16px 20px 0; display: flex; flex-direction: column; gap: 14px; }
-  .label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  label { font-weight: 550; font-size: 13px; }
-  .count { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
-  input, textarea { display: block; width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px;
-                    background: var(--field); color: var(--ink); font: inherit; }
-  textarea { height: 104px; resize: none; }
-  input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  ::placeholder { color: var(--ink-3); opacity: 1; }
-  button { font: inherit; cursor: pointer; }
-  button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .actions { display: flex; gap: 8px; }
-  #submit { flex: 1; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 9px; padding: 10px 16px;
-            font-weight: 600; }
-  #clear { background: var(--card); color: var(--ink-2); border: 1px solid var(--line); border-radius: 9px; padding: 10px 14px; }
-  #clear:hover { color: var(--ink); border-color: var(--ink-3); }
-  #clear[hidden] { display: none; }
-  input.invalid { border-color: var(--err); }
-  .field-error { margin: 6px 0 0; color: var(--err); font-size: 12.5px; }
+  /* The form column never spills out of its box: the description shrinks first, then the box scrolls. */
+  .form-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  form { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+  .grow { flex: 1; min-height: 96px; display: flex; flex-direction: column; }
+  .label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  label { font-weight: 600; font-size: 14px; }
+  .optional { color: var(--muted); font-size: 12px; }
+  input, textarea { display: block; width: 100%; padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px;
+                    background: var(--canvas); color: var(--fg); font: inherit; line-height: 20px; }
+  textarea { flex: 1; min-height: 60px; resize: none; padding-top: 8px; }
+  input:focus, textarea:focus { outline: 2px solid var(--focus); outline-offset: -1px; border-color: var(--focus); }
+  ::placeholder { color: var(--muted); opacity: 1; }
+  input.invalid { border-color: var(--danger); }
+  .field-error { margin: 4px 0 0; color: var(--danger); font-size: 12px; }
   .field-error[hidden] { display: none; }
-  .hint { margin: -4px 0 0; color: var(--ink-3); font-size: 12px; }
-  #submit:hover:not(:disabled) { background: var(--accent-hover); }
-  #submit:disabled { opacity: .6; cursor: default; }
 
-  .samples { padding: 16px 20px 20px; margin-top: auto; }
-  .samples h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
-  .samples ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-  .samples button { width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--line); color: var(--ink-2);
-                    border-radius: 8px; padding: 7px 10px; font-size: 12.5px; line-height: 1.35; }
-  .samples button:hover { border-color: var(--accent); color: var(--ink); }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .actions { display: flex; gap: 8px; flex: none; }
+  .btn { border-radius: 6px; padding: 5px 16px; line-height: 20px; font-weight: 500; border: 1px solid var(--border);
+         background: var(--subtle); color: var(--fg); }
+  .btn:hover { background: #eff2f5; }
+  .btn-primary { background: var(--green); border-color: rgba(31, 35, 40, .15); color: #ffffff; }
+  .btn-primary:hover:not(:disabled) { background: var(--green-hover); }
+  .btn-primary:disabled { opacity: .6; cursor: default; }
+  #clear[hidden] { display: none; }
+  .hint { margin: 0; color: var(--muted); font-size: 12px; flex: none; }
 
-  .results-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 12px;
-                  border-bottom: 1px solid var(--line-2); flex: none; }
-  .results-head h2 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
-  #status { color: var(--ink-2); font-size: 12.5px; text-align: right; }
-  #status.error { color: var(--err); background: var(--err-soft); padding: 4px 10px; border-radius: 999px; }
+  .samples { flex: none; border-top: 1px solid var(--border-muted); padding-top: 12px; }
+  .samples h3 { margin: 0 0 4px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .samples ul { list-style: none; margin: 0; padding: 0; }
+  .samples button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 2px 0;
+                    color: var(--link); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .samples button:hover { text-decoration: underline; }
 
-  #empty { flex: 1; display: grid; place-items: center; text-align: center; color: var(--ink-3); padding: 24px; }
+  #empty { flex: 1; display: grid; place-items: center; text-align: center; color: var(--muted); padding: 32px 24px; }
   #empty[hidden] { display: none; }
-  #empty strong { display: block; color: var(--ink-2); font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+  #empty strong { display: block; color: var(--fg); font-weight: 600; font-size: 16px; margin-bottom: 4px; }
 
   /* Ten rows share the available height, so the full list is visible without scrolling. */
-  #results { flex: 1; min-height: 0; list-style: none; margin: 0; padding: 4px 8px; display: grid;
+  #results { flex: 1; min-height: 0; list-style: none; margin: 0; padding: 0; display: grid;
              grid-template-rows: repeat(10, minmax(0, 1fr)); }
   #results[hidden] { display: none; }
   #results li { min-height: 0; display: flex; }
-  #results li + li { border-top: 1px solid var(--line-2); }
+  #results li + li { border-top: 1px solid var(--border-muted); }
   /* The whole row is the link, so it is an easy target to click or tap. */
-  .row { flex: 1; min-width: 0; display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px 92px 44px; align-items: center;
-         gap: 12px; padding: 0 12px; border-radius: 8px; color: inherit; text-decoration: none; }
-  a.row:hover { background: var(--bg); }
-  a.row:hover .title { color: var(--accent); }
-  .rank { width: 24px; height: 24px; border-radius: 7px; background: var(--bg); border: 1px solid var(--line);
-          display: grid; place-items: center; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-  li.best .rank { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 650; }
-  .title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink);
-           font-weight: 550; text-decoration: none; }
-  .num, .date { color: var(--ink-2); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .pct { text-align: right; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .row { flex: 1; min-width: 0; display: grid; grid-template-columns: 16px minmax(0, 1fr) auto auto; align-items: center;
+         gap: 12px; padding: 0 16px; color: inherit; text-decoration: none; }
+  a.row:hover { background: var(--subtle); }
+  a.row:hover .title { color: var(--link); }
+  .icon { width: 16px; height: 16px; fill: var(--open); flex: none; }
+  .title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+  .meta { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .label { font-size: 12px; font-weight: 500; line-height: 18px; padding: 0 7px; border: 1px solid var(--border);
+           border-radius: 2em; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  li.best .label { border-color: var(--open); color: var(--open); }
 
-  .cols { flex: none; display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px 92px 44px; gap: 12px;
-          padding: 8px 20px 0; color: var(--ink-3); font-size: 11.5px; }
-  .cols[hidden] { display: none; }
-  .foot { flex: none; padding: 10px 20px; border-top: 1px solid var(--line-2); color: var(--ink-3); font-size: 11.5px; }
+  .foot { flex: none; padding: 8px 16px; border-top: 1px solid var(--border); background: var(--subtle);
+          color: var(--muted); font-size: 12px; }
 
   @media (max-width: 900px) {
     html, body { height: auto; }
-    main { grid-template-columns: minmax(0, 1fr); padding: 16px; }
-    nav { padding: 0 16px; }
-    #results { grid-template-rows: none; grid-auto-rows: 48px; }
-    .row, .cols { grid-template-columns: 28px minmax(0, 1fr) 56px 44px; }
-    .hint { display: none; }
-    .date { display: none; }
+    main { grid-template-columns: minmax(0, 1fr); padding: 16px; gap: 16px; }
+    nav { padding: 8px 16px; }
+    .form-body { overflow: visible; }
+    .grow { min-height: 0; } textarea { height: 96px; flex: none; }
+    #results { grid-template-rows: none; grid-auto-rows: 44px; }
+    .meta .opened, .hint { display: none; }
+    .samples button { white-space: normal; }
     #empty { min-height: 160px; }
-    .results-head { flex-direction: column; align-items: flex-start; gap: 4px; }
-    #status { text-align: left; }
   }
-  @media (max-height: 640px) and (min-width: 901px) {
-    textarea { height: 64px; } .samples li:nth-child(n+3), .hint { display: none; }
-  }
+  @media (max-width: 560px) { .source { display: none; } }
+  @media (max-height: 660px) and (min-width: 901px) { .hint { display: none; } main { padding: 16px 24px; } }
 </style>
 </head>
 <body>
@@ -119,41 +113,39 @@
 </nav>
 
 <main>
-  <section class="card" aria-labelledby="h-new">
-    <div class="card-head">
-      <h1 id="h-new">New report</h1>
-      <p>Describe a bug to see whether it has already been filed.</p>
-    </div>
-    <form id="form" novalidate>
-      <div>
-        <div class="label-row"><label for="title">Title</label></div>
-        <input id="title" maxlength="200" required autocomplete="off" autofocus aria-describedby="title-error"
-               placeholder="e.g. Terminal crashes when pasting large text">
-        <p class="field-error" id="title-error" hidden>Enter a title to search.</p>
+  <section class="box" aria-labelledby="h-new">
+    <div class="box-head"><h1 id="h-new">New report</h1></div>
+    <div class="form-body">
+      <form id="form" novalidate>
+        <div>
+          <div class="label-row"><label for="title">Title</label></div>
+          <input id="title" maxlength="200" required autocomplete="off" autofocus aria-describedby="title-error"
+                 placeholder="e.g. Terminal crashes when pasting large text">
+          <p class="field-error" id="title-error" hidden>Enter a title to search.</p>
+        </div>
+        <div class="grow">
+          <div class="label-row"><label for="body">Description</label><span class="optional">optional</span></div>
+          <textarea id="body" maxlength="5000" placeholder="What happened, and the steps that lead to it"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="submit" type="submit">Search</button>
+          <button class="btn" id="clear" type="button" hidden>Clear</button>
+        </div>
+        <p class="hint">Press Enter to search. In the description, use Ctrl or ⌘ + Enter.</p>
+      </form>
+      <div class="samples">
+        <h3>Or try a sample report</h3>
+        <ul id="examples"></ul>
       </div>
-      <div>
-        <div class="label-row"><label for="body">Description</label><span class="count">optional</span></div>
-        <textarea id="body" maxlength="5000" placeholder="What happened, and the steps that lead to it"></textarea>
-      </div>
-      <div class="actions">
-        <button id="submit" type="submit">Search</button>
-        <button id="clear" type="button" hidden>Clear</button>
-      </div>
-      <p class="hint">Press Enter to search. In the description, use Ctrl or ⌘ + Enter.</p>
-    </form>
-    <div class="samples">
-      <h3>Or try a sample report</h3>
-      <ul id="examples"></ul>
     </div>
   </section>
 
-  <section class="card" aria-labelledby="h-res">
-    <div class="results-head">
+  <section class="box" aria-labelledby="h-res">
+    <div class="box-head">
       <h2 id="h-res">Similar existing reports</h2>
       <span id="status" role="status" aria-live="polite"></span>
     </div>
     <div id="empty"><div><strong>Nothing searched yet</strong>Type a title on the left, or pick a sample, then press Search.</div></div>
-    <div class="cols" id="cols" hidden><span></span><span>Report</span><span>Issue</span><span class="date">Opened</span><span class="pct">Match</span></div>
     <ol id="results" hidden></ol>
     <div class="foot">Match is each result's score relative to the top result, not the probability that it is a duplicate.</div>
   </section>
@@ -162,15 +154,29 @@
 <script>
 const EXAMPLES = [
   { title: "Cannot type @ with AltGr on a German keyboard", body: "Pressing AltGr+Q does nothing in the terminal, it works in the old console." },
-  { title: "Please add a settings window instead of editing JSON", body: "Changing font and colours by hand in the json file is awkward. A graphical settings page would help." },
-  { title: "New tab should open in the same directory as the current tab", body: "When I open a new tab it starts in my home folder. I want it to start in the folder I was working in." },
+  { title: "Add a settings window instead of editing JSON", body: "Changing font and colours by hand in the json file is awkward. A graphical settings page would help." },
+  { title: "Open new tabs in the current directory", body: "When I open a new tab it starts in my home folder. I want it to start in the folder I was working in." },
   { title: "Allow dragging tabs to reorder them", body: "" },
 ];
 const $ = (id) => document.getElementById(id);
 const form = $("form"), statusEl = $("status"), list = $("results"), empty = $("empty"), submit = $("submit");
 const titleEl = $("title"), bodyEl = $("body"), clearBtn = $("clear"), titleError = $("title-error");
 const INITIAL_EMPTY = ["Nothing searched yet", "Type a title on the left, or pick a sample, then press Search."];
-const dateFmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+// Small "open issue" mark: a ring with a dot.
+function issueIcon() {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 16 16"); svg.setAttribute("class", "icon"); svg.setAttribute("aria-hidden", "true");
+  const ring = document.createElementNS(SVG_NS, "path");
+  ring.setAttribute("fill-rule", "evenodd");
+  ring.setAttribute("d", "M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm0 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z");
+  const dot = document.createElementNS(SVG_NS, "circle");
+  dot.setAttribute("cx", "8"); dot.setAttribute("cy", "8"); dot.setAttribute("r", "2");
+  svg.append(ring, dot);
+  return svg;
+}
 
 function showTitleError(show) {
   titleError.hidden = !show;
@@ -199,7 +205,7 @@ function setEmpty(heading, text) {
   const strong = document.createElement("strong"); strong.textContent = heading;
   wrap.append(strong, document.createTextNode(text));
   empty.replaceChildren(wrap);
-  empty.hidden = false; list.hidden = true; $("cols").hidden = true; list.replaceChildren();
+  empty.hidden = false; list.hidden = true; list.replaceChildren();
 }
 function span(cls, text) {
   const el = document.createElement("span"); el.className = cls;
@@ -237,13 +243,13 @@ function render(results) {
       row.title = r.title;
     }
     const opened = new Date(r.created_at);
-    row.append(span("rank", String(i + 1)), span("title", r.title), span("num", "#" + r.number),
-               span("date", Number.isNaN(opened.getTime()) ? "" : dateFmt.format(opened)),
-               span("pct", Math.round(100 * r.score / top) + "%"));
+    const meta = span("meta", "#" + r.number);
+    if (!Number.isNaN(opened.getTime())) meta.appendChild(span("opened", " opened on " + dateFmt.format(opened)));
+    row.append(issueIcon(), span("title", r.title), meta, span("label", Math.round(100 * r.score / top) + "% match"));
     li.appendChild(row);
     list.appendChild(li);
   });
-  empty.hidden = true; list.hidden = false; $("cols").hidden = false;
+  empty.hidden = true; list.hidden = false;
 }
 
 form.addEventListener("submit", async (e) => {
