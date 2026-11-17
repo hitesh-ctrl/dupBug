@@ -25,42 +25,45 @@ def main() -> None:
     if "heldout" not in s:
         raise SystemExit("results/metrics.json has no held-out numbers: run scripts/run_eval.sh --final")
 
-    def row(name: str, key: str) -> str:
+    def pct(x: float) -> str:
+        return f"{x:.1%}"
+
+    def row(name: str, key: str, fmt) -> str:
         return (
-            f"| {name} | {s['tuning'][key]:.3f} | {n['tuning'][key]:.3f} | {d['tuning'][key]:+.3f} "
-            f"| {s['heldout'][key]:.3f} | {n['heldout'][key]:.3f} | {d['heldout'][key]:+.3f} |"
+            f"| {name} | **{fmt(s['heldout'][key])}** | {fmt(n['heldout'][key])} | {fmt(s['tuning'][key])} "
+            f"| {fmt(n['tuning'][key])} |"
         )
 
     lat = m["latency_ms_local"]
+    ratio = s["heldout"]["hit_at_10"] / n["heldout"]["hit_at_10"]
     lines = [
         START,
-        f"Measured on {m['generated_at']} against `{m['repository']}` "
-        f"({issues['issue_count']:,} issues, {issues['created_at_min'][:10]} to {issues['created_at_max'][:10]}; "
-        f"{pairs['stats']['kept']:,} duplicate pairs after checks).",
+        f"On duplicates it never saw during tuning, the issue it was closed as a duplicate of is in the top 10 "
+        f"results **{pct(s['heldout']['hit_at_10'])}** of the time, {ratio:.1f}× the rate of a plain title search "
+        f"({pct(n['heldout']['hit_at_10'])}).",
         "",
-        f"| metric | tuning (n={s['tuning']['n']}) | naive | gain | **held-out (n={s['heldout']['n']})** | naive | gain |",
-        "|---|---|---|---|---|---|---|",
-        row("hit@5", "hit_at_5"),
-        row("hit@10", "hit_at_10"),
-        row("MRR", "mrr"),
+        f"| Metric | Held-out (n={s['heldout']['n']}) | Baseline | Tuning (n={s['tuning']['n']}) | Baseline |",
+        "|:--|--:|--:|--:|--:|",
+        row("Hit@5", "hit_at_5", pct),
+        row("Hit@10", "hit_at_10", pct),
+        row("MRR", "mrr", lambda x: f"{x:.3f}"),
         "",
-        f"- Plain reading: on held-out pairs the original report is in the top 10 for "
-        f"{s['heldout']['hit_at_10']:.0%} of duplicates (naive baseline: {n['heldout']['hit_at_10']:.0%}).",
-        "- Naive baseline: title-only `match` on an index with Elasticsearch default settings, same time filter.",
-        f"- Label spot check: {label['correct']} of {label['sampled']} sampled pairs correct ({label['accuracy']:.0%}).",
+        f"<sub>Data: {issues['issue_count']:,} issues from <code>{m['repository']}</code> "
+        f"({issues['created_at_min'][:10]} to {issues['created_at_max'][:10]}), "
+        f"{pairs['stats']['kept']:,} verified duplicate pairs, split by time. "
+        f"Baseline: title-only match with Elasticsearch defaults. "
+        f"Label accuracy (manual check): {label['correct']}/{label['sampled']}. "
     ]
     if bugs:
-        lines.append(
-            f"- Planted bugs caught: first pass {bugs['first_pass']['caught']} of {bugs['first_pass']['total']}; "
-            f"final {bugs['final']['caught']} of {bugs['final']['total']} (details in docs/PLANTED_BUGS.md)."
+        lines[-1] += (
+            f"Planted bugs caught: {bugs['first_pass']['caught']}/{bugs['first_pass']['total']} on the first pass, "
+            f"{bugs['final']['caught']}/{bugs['final']['total']} after adding tests. "
         )
-    else:
-        lines.append("- Planted bugs caught: not measured yet.")
-    lines += [
-        f"- `/similar` latency, local only (client and server on one machine, sequential, n={lat['n']}): "
-        f"p50 {lat['p50']} ms, p95 {lat['p95']} ms. Not a network measurement.",
-        END,
-    ]
+    lines[-1] += (
+        f"Local latency of <code>/similar</code>: p50 {lat['p50']} ms, p95 {lat['p95']} ms "
+        f"(same machine, sequential, n={lat['n']:,}). Generated from <code>results/</code> on {m['generated_at'][:10]}.</sub>"
+    )
+    lines.append(END)
     readme = ROOT / "README.md"
     text = readme.read_text()
     a, b = text.index(START), text.index(END) + len(END)
