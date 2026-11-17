@@ -1,7 +1,7 @@
 {
- "generated_at": "2026-11-16T21:35:00Z",
+ "generated_at": "2026-11-17T06:09:32Z",
  "repository": "microsoft/terminal",
- "note": "final tuned state",
+ "note": "final tuned state, clean install",
  "top_k": 10,
  "service": {
   "tuning": {
@@ -18917,8 +18917,8 @@
  },
  "latency_ms_local": {
   "n": 1886,
-  "p50": 2.8,
-  "p95": 5.5,
+  "p50": 3.6,
+  "p95": 6.2,
   "note": "client-side, localhost, sequential requests; not a network measurement"
  }
 }
