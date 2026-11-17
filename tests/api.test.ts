@@ -161,7 +161,7 @@ describe("demo page", () => {
     const page = await request(app).get("/");
     expect(page.status).toBe(200);
     expect(page.headers["content-type"]).toMatch(/text\/html/);
-    expect(page.text).toContain("Duplicate bug report finder");
+    expect(page.text).toContain("Duplicate Report Finder");
     const missing = await request(app).get("/nope");
     expect(missing.status).toBe(404);
     expect(missing.body).toEqual({ error: "not_found" });

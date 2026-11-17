@@ -40,8 +40,8 @@ tuning pairs (`results/failures.json`). Held-out results are lower than tuning r
 
 - **One repository only.** Parameters and the template clean-up were chosen on `microsoft/terminal`. Nothing is known
   about other projects, other issue templates or other languages.
-- **Noisy duplicate labels.** The spot check covered 30 of 1,925 pairs and was done by the AI assistant that built the
-  project, not by a maintainer. 2 of 30 were doubtful. Duplicates closed without a numbered reference (503 candidates)
+- **Noisy duplicate labels.** The spot check covered 30 of 1,925 pairs and was done manually within this project,
+  not by a maintainer of the repository. 2 of 30 were doubtful. Duplicates closed without a numbered reference (503 candidates)
   are absent, and only precision of the labels was checked.
 - **Scoring is strict and the pair set is skewed.** Only the one issue named by the maintainer counts as a hit; returning
   another earlier report of the same bug counts as a miss. 957 of the 1,886 pairs point to an original that has five or

@@ -3,78 +3,153 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Duplicate bug report finder</title>
+<title>Duplicate Report Finder</title>
 <style>
   :root {
-    --bg: #f6f7f9; --card: #ffffff; --text: #1b1f24; --muted: #5d6673; --line: #dfe3e8;
-    --accent: #1f5fd0; --accent-text: #ffffff; --bar: #c9d9f7; --error: #b3261e;
+    --page: #f3f4f6; --surface: #ffffff; --ink: #111827; --ink-2: #4b5563; --ink-3: #6b7280;
+    --rule: #d9dde3; --rule-soft: #eceef1; --brand: #0b2545; --brand-ink: #ffffff; --brand-sub: #b8c4d6;
+    --accent: #1d4ed8; --accent-ink: #ffffff; --accent-soft: #e8eefc; --field: #ffffff;
+    --danger: #b42318; --danger-soft: #fdecea; --track: #e5e7eb;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #14171b; --card: #1d2126; --text: #e8eaed; --muted: #9aa3ae; --line: #30363d;
-      --accent: #6ea0ff; --accent-text: #0d1117; --bar: #2a3b5c; --error: #ff8a80;
+      --page: #0f1216; --surface: #171b21; --ink: #e6e8eb; --ink-2: #aab2bd; --ink-3: #8a93a0;
+      --rule: #2a313a; --rule-soft: #212730; --brand: #0b1626; --brand-ink: #f3f5f8; --brand-sub: #8ea0b8;
+      --accent: #7aa2ff; --accent-ink: #0b1220; --accent-soft: #1b2740; --field: #11151a;
+      --danger: #ff9b91; --danger-soft: #3a1b18; --track: #2a313a;
     }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  p.lead { color: var(--muted); margin: 0 0 24px; }
-  form, .result, .note { background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
-  form { padding: 16px; }
-  label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
-  input, textarea { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 6px;
-                    background: var(--bg); color: var(--text); font: inherit; }
-  textarea { min-height: 110px; resize: vertical; }
-  .field { margin-bottom: 14px; }
-  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  button { font: inherit; border-radius: 6px; cursor: pointer; }
-  button.primary { background: var(--accent); color: var(--accent-text); border: 0; padding: 10px 18px; font-weight: 600; }
-  button.primary:disabled { opacity: .6; cursor: default; }
-  button.example { background: transparent; color: var(--accent); border: 1px solid var(--line); padding: 6px 10px; font-size: .85rem; }
-  .examples { margin-top: 14px; color: var(--muted); font-size: .85rem; }
-  #status { margin: 20px 0 10px; color: var(--muted); min-height: 1.5em; }
-  #status.error { color: var(--error); }
-  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-  .result { padding: 12px 14px; display: grid; grid-template-columns: 2rem 1fr; gap: 4px 8px; }
-  .rank { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .result a { color: var(--accent); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
-  .result a:hover { text-decoration: underline; }
-  .meta { grid-column: 2; color: var(--muted); font-size: .85rem; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .bar { height: 6px; width: 120px; background: var(--line); border-radius: 3px; overflow: hidden; }
-  .bar > span { display: block; height: 100%; background: var(--accent); }
-  .note { margin-top: 28px; padding: 12px 14px; color: var(--muted); font-size: .85rem; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--page); color: var(--ink);
+         font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+
+  header.top { background: var(--brand); color: var(--brand-ink); border-bottom: 1px solid var(--rule); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  header.top .wrap { display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+                     padding-top: 18px; padding-bottom: 18px; flex-wrap: wrap; }
+  .brand { font-size: 1.15rem; font-weight: 650; letter-spacing: .01em; }
+  .source { color: var(--brand-sub); font-size: .82rem; letter-spacing: .02em; }
+
+  .intro { padding: 28px 0 20px; max-width: 70ch; }
+  .intro h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 8px; font-weight: 650; letter-spacing: -.01em; }
+  .intro p { margin: 0; color: var(--ink-2); }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px; align-items: start; padding-bottom: 40px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } .wrap { padding: 0 16px; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; }
+  .panel > h2 { margin: 0; padding: 14px 18px; font-size: .78rem; font-weight: 650; letter-spacing: .08em;
+                text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule-soft); }
+  .panel-body { padding: 18px; }
+
+  .field { margin-bottom: 16px; }
+  .label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  label { font-weight: 600; font-size: .88rem; }
+  .hint { color: var(--ink-3); font-size: .78rem; font-variant-numeric: tabular-nums; }
+  input, textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--rule); border-radius: 6px;
+                    background: var(--field); color: var(--ink); font: inherit; }
+  input:focus, textarea:focus, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  textarea { min-height: 132px; resize: vertical; }
+  button { font: inherit; cursor: pointer; }
+  .primary { width: 100%; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 6px;
+             padding: 11px 16px; font-weight: 650; }
+  .primary:disabled { opacity: .6; cursor: default; }
+
+  .examples { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rule-soft); }
+  .examples h3 { margin: 0 0 8px; font-size: .78rem; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  .examples ul { list-style: none; margin: 0; padding: 0; }
+  .examples button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 6px 0;
+                     color: var(--accent); font-size: .88rem; }
+  .examples button:hover { text-decoration: underline; }
+
+  .status { padding: 12px 18px; color: var(--ink-2); font-size: .88rem; border-bottom: 1px solid var(--rule-soft); min-height: 45px; }
+  .status.error { color: var(--danger); background: var(--danger-soft); }
+  .empty { padding: 44px 18px; text-align: center; color: var(--ink-3); }
+
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: .74rem; font-weight: 650; letter-spacing: .07em; text-transform: uppercase;
+       color: var(--ink-3); padding: 10px 12px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  td { padding: 12px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th:first-child, td:first-child { padding-left: 18px; }
+  th:last-child, td:last-child { padding-right: 18px; }
+  td.rank { color: var(--ink-3); font-variant-numeric: tabular-nums; width: 2.5rem; }
+  td.title a { color: var(--ink); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+  td.title a[href]:hover { color: var(--accent); text-decoration: underline; }
+  td.num, td.date { color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.rel { width: 130px; white-space: nowrap; }
+  .meter { display: inline-block; width: 72px; height: 6px; background: var(--track); border-radius: 3px; overflow: hidden; vertical-align: middle; }
+  .meter > span { display: block; height: 100%; background: var(--accent); }
+  .pct { display: inline-block; width: 3.2em; text-align: right; color: var(--ink-2); font-size: .82rem; font-variant-numeric: tabular-nums; }
+  tr.best td { background: var(--accent-soft); }
+  @media (max-width: 560px) { th.date, td.date { display: none; } td.rel { width: auto; } .meter { width: 44px; } }
+
+  footer { border-top: 1px solid var(--rule); color: var(--ink-3); font-size: .82rem; }
+  footer .wrap { padding-top: 18px; padding-bottom: 28px; display: grid; gap: 6px; max-width: 1120px; }
+  footer strong { color: var(--ink-2); font-weight: 600; }
 </style>
 </head>
 <body>
-<main>
-  <h1>Duplicate bug report finder</h1>
-  <p class="lead">Describe a bug. The service returns the existing reports most likely to be the same one,
-    searched over 8,000 public issues of microsoft/terminal.</p>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">Duplicate Report Finder</div>
+    <div class="source">Data set: microsoft/terminal &middot; 8,000 public issues</div>
+  </div>
+</header>
 
-  <form id="form">
-    <div class="field">
-      <label for="title">Title</label>
-      <input id="title" maxlength="200" required autocomplete="off" placeholder="Short summary of the bug">
-    </div>
-    <div class="field">
-      <label for="body">Description (optional)</label>
-      <textarea id="body" maxlength="5000" placeholder="What happened, steps to reproduce"></textarea>
-    </div>
-    <div class="row">
-      <button class="primary" id="submit" type="submit">Find similar reports</button>
-    </div>
-    <div class="examples row" id="examples"><span>Try:</span></div>
-  </form>
+<main class="wrap">
+  <section class="intro">
+    <h1>Check whether a bug has already been reported</h1>
+    <p>Enter a new report. The service searches the existing issues and lists the ten that are most likely to
+      describe the same problem.</p>
+  </section>
 
-  <div id="status" role="status" aria-live="polite"></div>
-  <ol id="results"></ol>
+  <div class="grid">
+    <section class="panel" aria-labelledby="h-new">
+      <h2 id="h-new">New report</h2>
+      <div class="panel-body">
+        <form id="form" novalidate>
+          <div class="field">
+            <div class="label-row"><label for="title">Title</label><span class="hint" id="title-count">0 / 200</span></div>
+            <input id="title" maxlength="200" required autocomplete="off" placeholder="Short summary of the problem">
+          </div>
+          <div class="field">
+            <div class="label-row"><label for="body">Description <span class="hint">(optional)</span></label><span class="hint" id="body-count">0 / 5,000</span></div>
+            <textarea id="body" maxlength="5000" placeholder="What happened and how to reproduce it"></textarea>
+          </div>
+          <button class="primary" id="submit" type="submit">Search existing reports</button>
+        </form>
+        <div class="examples">
+          <h3>Sample reports</h3>
+          <ul id="examples"></ul>
+        </div>
+      </div>
+    </section>
 
-  <div class="note">Keyword search (Elasticsearch, English stemming). On held-out real duplicates the maintainer-chosen
-    original is in the top 10 for about three in ten; see the README for measured numbers and limits.
-    The bar shows each score relative to the best match, not a probability.</div>
+    <section class="panel" aria-labelledby="h-res">
+      <h2 id="h-res">Similar existing reports</h2>
+      <div class="status" id="status" role="status" aria-live="polite">No search yet.</div>
+      <div class="empty" id="empty">Results appear here after a search.</div>
+      <div class="table-scroll" id="table-wrap" hidden>
+        <table>
+          <thead><tr><th>#</th><th>Report</th><th>Issue</th><th class="date">Opened</th><th>Relevance</th></tr></thead>
+          <tbody id="results"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 </main>
+
+<footer>
+  <div class="wrap">
+    <div><strong>Method.</strong> Keyword search on Elasticsearch with English stemming over titles and descriptions.</div>
+    <div><strong>Relevance.</strong> Each score is shown relative to the best match in the list. It is not a probability that the reports are duplicates.</div>
+    <div><strong>Accuracy.</strong> Measured on real duplicates closed by the project's maintainers; figures and limitations are in the project README.</div>
+  </div>
+</footer>
+
 <script>
 const EXAMPLES = [
   { title: "Cannot type @ with AltGr on a German keyboard", body: "Pressing AltGr+Q does nothing in the terminal, it works in the old console." },
@@ -83,68 +158,102 @@ const EXAMPLES = [
   { title: "Allow dragging tabs to reorder them", body: "" },
 ];
 const $ = (id) => document.getElementById(id);
-const form = $("form"), statusEl = $("status"), list = $("results"), submit = $("submit");
+const form = $("form"), statusEl = $("status"), tbody = $("results"), submit = $("submit");
+const titleEl = $("title"), bodyEl = $("body");
+
+function updateCounts() {
+  $("title-count").textContent = titleEl.value.length + " / 200";
+  $("body-count").textContent = bodyEl.value.length.toLocaleString("en-US") + " / 5,000";
+}
+titleEl.addEventListener("input", updateCounts);
+bodyEl.addEventListener("input", updateCounts);
 
 for (const ex of EXAMPLES) {
+  const li = document.createElement("li");
   const b = document.createElement("button");
-  b.type = "button"; b.className = "example"; b.textContent = ex.title;
-  b.addEventListener("click", () => { $("title").value = ex.title; $("body").value = ex.body; form.requestSubmit(); });
-  $("examples").appendChild(b);
+  b.type = "button"; b.textContent = ex.title;
+  b.addEventListener("click", () => { titleEl.value = ex.title; bodyEl.value = ex.body; updateCounts(); form.requestSubmit(); });
+  li.appendChild(b); $("examples").appendChild(li);
 }
 
 function setStatus(text, isError) {
   statusEl.textContent = text;
-  statusEl.className = isError ? "error" : "";
+  statusEl.className = isError ? "status error" : "status";
+}
+function showTable(show, emptyText) {
+  $("table-wrap").hidden = !show;
+  $("empty").hidden = show;
+  if (emptyText) $("empty").textContent = emptyText;
+}
+function cell(cls, text) {
+  const td = document.createElement("td"); td.className = cls;
+  if (text !== undefined) td.textContent = text;
+  return td;
 }
 
-// Results are rendered with textContent only; titles come from public issue data and are untrusted.
+// All text is written with textContent; issue titles come from public data and are untrusted.
 function render(results) {
-  list.replaceChildren();
-  const top = results.length ? results[0].score : 1;
+  tbody.replaceChildren();
+  const top = results.length && results[0].score > 0 ? results[0].score : 1;
   results.forEach((r, i) => {
-    const li = document.createElement("li"); li.className = "result";
-    const rank = document.createElement("span"); rank.className = "rank"; rank.textContent = (i + 1) + ".";
+    const tr = document.createElement("tr");
+    if (i === 0) tr.className = "best";
+    const title = cell("title");
     const a = document.createElement("a"); a.textContent = r.title;
     if (typeof r.url === "string" && r.url.startsWith("https://github.com/")) {
       a.href = r.url; a.target = "_blank"; a.rel = "noopener noreferrer";
     }
-    const meta = document.createElement("div"); meta.className = "meta";
-    const num = document.createElement("span"); num.textContent = "#" + r.number;
-    const date = document.createElement("span"); date.textContent = "opened " + String(r.created_at).slice(0, 10);
-    const bar = document.createElement("span"); bar.className = "bar";
-    const fill = document.createElement("span"); fill.style.width = Math.round(100 * r.score / top) + "%";
-    bar.appendChild(fill);
-    meta.append(num, date, bar);
-    li.append(rank, a, meta);
-    list.appendChild(li);
+    title.appendChild(a);
+    const pct = Math.round(100 * r.score / top);
+    const rel = cell("rel");
+    const meter = document.createElement("span"); meter.className = "meter";
+    const fill = document.createElement("span"); fill.style.width = pct + "%";
+    meter.appendChild(fill);
+    const label = document.createElement("span"); label.className = "pct"; label.textContent = pct + "%";
+    rel.append(meter, label);
+    tr.append(cell("rank", String(i + 1)), title, cell("num", "#" + r.number),
+              cell("date", String(r.created_at).slice(0, 10)), rel);
+    tbody.appendChild(tr);
   });
 }
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const title = $("title").value.trim();
-  if (!title) { setStatus("Enter a title.", true); return; }
-  submit.disabled = true; setStatus("Searching…");
+  const title = titleEl.value.trim();
+  if (!title) { setStatus("A title is required.", true); titleEl.focus(); return; }
+  submit.disabled = true; submit.textContent = "Searching…"; setStatus("Searching…");
+  const started = performance.now();
   try {
     const res = await fetch("/similar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, body: $("body").value }),
+      body: JSON.stringify({ title, body: bodyEl.value }),
     });
     const data = await res.json().catch(() => ({}));
-    if (res.status === 503) { list.replaceChildren(); setStatus("Search is unavailable right now (Elasticsearch is not reachable).", true); }
-    else if (res.status === 400) { list.replaceChildren(); setStatus("The request was rejected: title must be 1 to 200 characters, description at most 5,000.", true); }
-    else if (!res.ok) { list.replaceChildren(); setStatus("Something went wrong (" + res.status + ").", true); }
-    else {
+    if (res.ok) {
+      const ms = Math.round(performance.now() - started);
       render(data.results);
-      setStatus(data.results.length ? data.results.length + " most similar existing reports" : "No similar reports found.");
+      if (data.results.length) {
+        showTable(true);
+        setStatus(data.results.length + " reports found in " + ms + " ms, most similar first.");
+      } else {
+        showTable(false, "No similar reports were found.");
+        setStatus("0 reports found.");
+      }
+    } else {
+      showTable(false, "No results to show.");
+      if (res.status === 503) setStatus("The search service is unavailable. Check that Elasticsearch is running.", true);
+      else if (res.status === 400) setStatus("The report was not accepted. The title must be 1 to 200 characters and the description at most 5,000.", true);
+      else setStatus("The request failed (status " + res.status + ").", true);
     }
   } catch {
-    list.replaceChildren(); setStatus("Could not reach the service.", true);
+    showTable(false, "No results to show.");
+    setStatus("The service could not be reached.", true);
   } finally {
-    submit.disabled = false;
+    submit.disabled = false; submit.textContent = "Search existing reports";
   }
 });
+updateCounts();
 </script>
 </body>
 </html>

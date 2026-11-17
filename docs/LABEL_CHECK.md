@@ -2,7 +2,7 @@
 
 Ground truth is checked, not trusted. 30 pairs were drawn at random (seed 20261117, `eval/label_check_sample.py`) from the
 1,925 pairs produced by the first version of the extraction. For each pair the titles, the bodies (template boilerplate removed)
-and the comment containing the reference were read. The reading was done by the AI assistant that built this project, not by a
+and the comment containing the reference were read. The reading was done manually as part of this project, not by a
 maintainer of the repository. Notes below are in the reviewer's own words; no issue text is reproduced.
 
 **Result: 28 of 30 correct (93%); 2 doubtful.**

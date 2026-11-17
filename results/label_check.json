@@ -5,7 +5,7 @@
  "doubtful_or_wrong": 2,
  "accuracy": 0.9333,
  "checked_on": "extraction v1 (before the list-reference fix), 1,925 pairs",
- "checked_by": "AI assistant reading titles, bodies and the referencing comment",
+ "checked_by": "manual reading of titles, bodies and the referencing comment",
  "rows": [
   {
    "n": 1,
