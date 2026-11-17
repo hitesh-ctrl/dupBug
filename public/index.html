@@ -41,8 +41,16 @@
   ::placeholder { color: var(--ink-3); opacity: 1; }
   button { font: inherit; cursor: pointer; }
   button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  #submit { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 9px; padding: 10px 16px;
+  .actions { display: flex; gap: 8px; }
+  #submit { flex: 1; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 9px; padding: 10px 16px;
             font-weight: 600; }
+  #clear { background: var(--card); color: var(--ink-2); border: 1px solid var(--line); border-radius: 9px; padding: 10px 14px; }
+  #clear:hover { color: var(--ink); border-color: var(--ink-3); }
+  #clear[hidden] { display: none; }
+  input.invalid { border-color: var(--err); }
+  .field-error { margin: 6px 0 0; color: var(--err); font-size: 12.5px; }
+  .field-error[hidden] { display: none; }
+  .hint { margin: -4px 0 0; color: var(--ink-3); font-size: 12px; }
   #submit:hover:not(:disabled) { background: var(--accent-hover); }
   #submit:disabled { opacity: .6; cursor: default; }
 
@@ -50,8 +58,7 @@
   .samples h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
   .samples ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
   .samples button { width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--line); color: var(--ink-2);
-                    border-radius: 8px; padding: 7px 10px; font-size: 12.5px; white-space: nowrap; overflow: hidden;
-                    text-overflow: ellipsis; }
+                    border-radius: 8px; padding: 7px 10px; font-size: 12.5px; line-height: 1.35; }
   .samples button:hover { border-color: var(--accent); color: var(--ink); }
 
   .results-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 12px;
@@ -68,15 +75,18 @@
   #results { flex: 1; min-height: 0; list-style: none; margin: 0; padding: 4px 8px; display: grid;
              grid-template-rows: repeat(10, minmax(0, 1fr)); }
   #results[hidden] { display: none; }
-  #results li { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px 92px 44px; align-items: center; gap: 12px;
-                padding: 0 12px; border-radius: 9px; min-height: 0; }
+  #results li { min-height: 0; display: flex; }
   #results li + li { border-top: 1px solid var(--line-2); }
+  /* The whole row is the link, so it is an easy target to click or tap. */
+  .row { flex: 1; min-width: 0; display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px 92px 44px; align-items: center;
+         gap: 12px; padding: 0 12px; border-radius: 8px; color: inherit; text-decoration: none; }
+  a.row:hover { background: var(--bg); }
+  a.row:hover .title { color: var(--accent); }
   .rank { width: 24px; height: 24px; border-radius: 7px; background: var(--bg); border: 1px solid var(--line);
           display: grid; place-items: center; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
   li.best .rank { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 650; }
   .title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink);
            font-weight: 550; text-decoration: none; }
-  a.title:hover { color: var(--accent); }
   .num, .date { color: var(--ink-2); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .pct { text-align: right; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
@@ -90,14 +100,15 @@
     main { grid-template-columns: minmax(0, 1fr); padding: 16px; }
     nav { padding: 0 16px; }
     #results { grid-template-rows: none; grid-auto-rows: 48px; }
-    #results li, .cols { grid-template-columns: 28px minmax(0, 1fr) 56px 44px; }
+    .row, .cols { grid-template-columns: 28px minmax(0, 1fr) 56px 44px; }
+    .hint { display: none; }
     .date { display: none; }
     #empty { min-height: 160px; }
     .results-head { flex-direction: column; align-items: flex-start; gap: 4px; }
     #status { text-align: left; }
   }
   @media (max-height: 640px) and (min-width: 901px) {
-    textarea { height: 64px; } .samples li:nth-child(n+3) { display: none; }
+    textarea { height: 64px; } .samples li:nth-child(n+3), .hint { display: none; }
   }
 </style>
 </head>
@@ -116,16 +127,22 @@
     <form id="form" novalidate>
       <div>
         <div class="label-row"><label for="title">Title</label></div>
-        <input id="title" maxlength="200" required autocomplete="off" placeholder="Short summary of the problem">
+        <input id="title" maxlength="200" required autocomplete="off" autofocus aria-describedby="title-error"
+               placeholder="e.g. Terminal crashes when pasting large text">
+        <p class="field-error" id="title-error" hidden>Enter a title to search.</p>
       </div>
       <div>
         <div class="label-row"><label for="body">Description</label><span class="count">optional</span></div>
-        <textarea id="body" maxlength="5000" placeholder="What happened and how to reproduce it"></textarea>
+        <textarea id="body" maxlength="5000" placeholder="What happened, and the steps that lead to it"></textarea>
       </div>
-      <button id="submit" type="submit">Search</button>
+      <div class="actions">
+        <button id="submit" type="submit">Search</button>
+        <button id="clear" type="button" hidden>Clear</button>
+      </div>
+      <p class="hint">Press Enter to search. In the description, use Ctrl or ⌘ + Enter.</p>
     </form>
     <div class="samples">
-      <h3>Sample reports</h3>
+      <h3>Or try a sample report</h3>
       <ul id="examples"></ul>
     </div>
   </section>
@@ -135,7 +152,7 @@
       <h2 id="h-res">Similar existing reports</h2>
       <span id="status" role="status" aria-live="polite"></span>
     </div>
-    <div id="empty"><div><strong>No search yet</strong>Enter a report or pick a sample, then press Search.</div></div>
+    <div id="empty"><div><strong>Nothing searched yet</strong>Type a title on the left, or pick a sample, then press Search.</div></div>
     <div class="cols" id="cols" hidden><span></span><span>Report</span><span>Issue</span><span class="date">Opened</span><span class="pct">Match</span></div>
     <ol id="results" hidden></ol>
     <div class="foot">Match is each result's score relative to the top result, not the probability that it is a duplicate.</div>
@@ -151,7 +168,26 @@ const EXAMPLES = [
 ];
 const $ = (id) => document.getElementById(id);
 const form = $("form"), statusEl = $("status"), list = $("results"), empty = $("empty"), submit = $("submit");
-const titleEl = $("title"), bodyEl = $("body");
+const titleEl = $("title"), bodyEl = $("body"), clearBtn = $("clear"), titleError = $("title-error");
+const INITIAL_EMPTY = ["Nothing searched yet", "Type a title on the left, or pick a sample, then press Search."];
+const dateFmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
+function showTitleError(show) {
+  titleError.hidden = !show;
+  titleEl.classList.toggle("invalid", show);
+}
+function syncClear() {
+  clearBtn.hidden = !(titleEl.value || bodyEl.value || !list.hidden);
+}
+titleEl.addEventListener("input", () => { showTitleError(false); syncClear(); });
+bodyEl.addEventListener("input", syncClear);
+bodyEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); form.requestSubmit(); }
+});
+clearBtn.addEventListener("click", () => {
+  titleEl.value = ""; bodyEl.value = ""; showTitleError(false);
+  setStatus(""); setEmpty(...INITIAL_EMPTY); syncClear(); titleEl.focus();
+});
 
 
 function setStatus(text, isError) {
@@ -177,9 +213,9 @@ for (const ex of EXAMPLES) {
   b.type = "button"; b.textContent = ex.title; b.title = ex.title;
   // A sample only fills in the form; nothing is searched until Search is pressed.
   b.addEventListener("click", () => {
-    titleEl.value = ex.title; bodyEl.value = ex.body;
-    setStatus(""); setEmpty("Sample loaded", "Press Search to run it.");
-    submit.focus();
+    titleEl.value = ex.title; bodyEl.value = ex.body; showTitleError(false);
+    setStatus(""); setEmpty("Sample loaded", "Press Search to see similar reports.");
+    syncClear(); submit.focus();
   });
   li.appendChild(b); $("examples").appendChild(li);
 }
@@ -192,12 +228,19 @@ function render(results) {
     const li = document.createElement("li");
     if (i === 0) li.className = "best";
     const linked = typeof r.url === "string" && r.url.startsWith("https://github.com/");
-    const title = document.createElement(linked ? "a" : "span");
-    title.className = "title"; title.textContent = r.title; title.title = r.title;
-    if (linked) { title.href = r.url; title.target = "_blank"; title.rel = "noopener noreferrer"; }
-    li.append(span("rank", String(i + 1)), title, span("num", "#" + r.number),
-              span("date", String(r.created_at).slice(0, 10)),
-              span("pct", Math.round(100 * r.score / top) + "%"));
+    const row = document.createElement(linked ? "a" : "div");
+    row.className = "row";
+    if (linked) {
+      row.href = r.url; row.target = "_blank"; row.rel = "noopener noreferrer";
+      row.title = r.title + " (opens on GitHub in a new tab)";
+    } else {
+      row.title = r.title;
+    }
+    const opened = new Date(r.created_at);
+    row.append(span("rank", String(i + 1)), span("title", r.title), span("num", "#" + r.number),
+               span("date", Number.isNaN(opened.getTime()) ? "" : dateFmt.format(opened)),
+               span("pct", Math.round(100 * r.score / top) + "%"));
+    li.appendChild(row);
     list.appendChild(li);
   });
   empty.hidden = true; list.hidden = false; $("cols").hidden = false;
@@ -206,8 +249,10 @@ function render(results) {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const title = titleEl.value.trim();
-  if (!title) { setStatus("A title is required.", true); titleEl.focus(); return; }
+  if (!title) { showTitleError(true); titleEl.focus(); return; }
+  showTitleError(false);
   submit.disabled = true; submit.textContent = "Searching…"; setStatus("");
+  if (list.hidden) setEmpty("Searching…", "Looking through 8,000 reports.");
   try {
     const res = await fetch("/similar", {
       method: "POST",
@@ -217,22 +262,24 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.results.length) {
       render(data.results);
-      setStatus(data.results.length + " reports, most similar first");
+      setStatus("Top " + data.results.length + " matches · click a report to open it on GitHub");
+      // On a phone the results are below the form: bring them into view.
+      if (window.matchMedia("(max-width: 900px)").matches) $("h-res").scrollIntoView({ behavior: "smooth", block: "start" });
     } else if (res.ok) {
-      setEmpty("No similar reports found", "Try different wording.");
+      setEmpty("No similar reports found", "This may be a new bug. Try other words to be sure.");
       setStatus("");
     } else {
-      setEmpty("No results", "The search could not be completed.");
-      if (res.status === 503) setStatus("Search service unavailable", true);
-      else if (res.status === 429) setStatus("Too many requests, try again shortly", true);
-      else if (res.status === 400) setStatus("Title must be 1–200 characters, description up to 5,000", true);
-      else setStatus("Request failed (" + res.status + ")", true);
+      setStatus("");
+      if (res.status === 503) setEmpty("Search is temporarily unavailable", "Please try again in a minute.");
+      else if (res.status === 429) setEmpty("Too many searches", "Please wait a moment, then press Search again.");
+      else if (res.status === 400) setEmpty("That report could not be searched", "Keep the title under 200 characters and the description under 5,000.");
+      else setEmpty("Something went wrong", "Please press Search again.");
     }
   } catch {
-    setEmpty("No results", "The search could not be completed.");
-    setStatus("Service could not be reached", true);
+    setStatus("");
+    setEmpty("Could not reach the service", "Check your connection, then press Search again.");
   } finally {
-    submit.disabled = false; submit.textContent = "Search";
+    submit.disabled = false; submit.textContent = "Search"; syncClear();
   }
 });
 </script>
