@@ -28,6 +28,29 @@ export interface AppDeps {
   client: Client;
   index: string;
   params?: SearchParams;
+  /** Max POST /similar requests per client address per minute (0 or undefined = no limit). For public hosting. */
+  rateLimitPerMin?: number;
+}
+
+/** Small fixed-window limiter kept in memory; enough for a single-process demo deployment. */
+function rateLimiter(limit: number): express.RequestHandler {
+  const hits = new Map<string, { count: number; resetAt: number }>();
+  return (req, res, next) => {
+    const now = Date.now();
+    const key = req.ip ?? "unknown";
+    const entry = hits.get(key);
+    if (!entry || entry.resetAt <= now) {
+      if (hits.size > 10000) hits.clear();
+      hits.set(key, { count: 1, resetAt: now + 60_000 });
+      next();
+    } else if (entry.count < limit) {
+      entry.count++;
+      next();
+    } else {
+      res.set("Retry-After", String(Math.ceil((entry.resetAt - now) / 1000)));
+      res.status(429).json({ error: "rate_limited" });
+    }
+  };
 }
 
 interface IssueSource {
@@ -37,7 +60,7 @@ interface IssueSource {
   created_at: string;
 }
 
-export function createApp({ client, index, params = DEFAULT_PARAMS }: AppDeps): Express {
+export function createApp({ client, index, params = DEFAULT_PARAMS, rateLimitPerMin = 0 }: AppDeps): Express {
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "64kb" }));
@@ -50,6 +73,8 @@ export function createApp({ client, index, params = DEFAULT_PARAMS }: AppDeps): 
       res.status(503).json({ error: "search_unavailable" });
     }
   });
+
+  if (rateLimitPerMin > 0) app.post("/similar", rateLimiter(rateLimitPerMin));
 
   app.post("/similar", async (req, res) => {
     const body = BodySchema.safeParse(req.body);

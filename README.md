@@ -79,7 +79,7 @@ curl -s -X POST 'http://127.0.0.1:3187/similar' -H 'Content-Type: application/js
   before this instant are searched. The evaluation passes the duplicate's own creation time, so a query can never see
   itself or anything newer.
 - Response: `{"results": [{"number", "title", "url", "created_at", "score"}, ...]}`, at most 10, best first.
-- Errors: 400 `invalid_request`, 413 `payload_too_large`, 503 `search_unavailable` (Elasticsearch down), never a stack trace.
+- Errors: 400 `invalid_request`, 413 `payload_too_large`, 429 `rate_limited` (only when `RATE_LIMIT_PER_MIN` is set), 503 `search_unavailable` (Elasticsearch down), never a stack trace.
 - User text is only used as the value of `match` clauses; there is no `query_string` and no user-supplied JSON in the query.
 
 ## Tests, evaluation, gate

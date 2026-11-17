@@ -170,6 +170,20 @@ describe("demo page", () => {
   });
 });
 
+describe("POST /similar: rate limit (off by default, for public hosting)", () => {
+  it("answers 429 with Retry-After once the per-minute limit is used up", async () => {
+    const limited = createApp({ client, index: INDEX, rateLimitPerMin: 3 });
+    for (let i = 0; i < 3; i++) {
+      expect((await request(limited).post("/similar").send({ title: "cursor" })).status).toBe(200);
+    }
+    const res = await request(limited).post("/similar").send({ title: "cursor" });
+    expect(res.status).toBe(429);
+    expect(res.body).toEqual({ error: "rate_limited" });
+    expect(Number(res.headers["retry-after"])).toBeGreaterThan(0);
+    expect((await request(limited).get("/")).status).toBe(200); // the page itself is not limited
+  });
+});
+
 describe("POST /similar: Elasticsearch down", () => {
   it("answers 503 without a stack trace or internal details", async () => {
     const deadClient = new Client({ node: "http://127.0.0.1:59999", maxRetries: 0, requestTimeout: 1000 });
