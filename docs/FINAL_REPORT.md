@@ -21,7 +21,7 @@ install (Elasticsearch data folder deleted, `node_modules` removed, new Python v
 
 | check | result |
 |---|---|
-| API tests (vitest + supertest, real Elasticsearch): shape, validation, hostile strings, 503 when Elasticsearch is down, no-future, stemming, query structure | 37 of 37 pass |
+| API tests (vitest + supertest, real Elasticsearch): shape, validation, hostile strings, 503 when Elasticsearch is down, no-future, stemming, query structure, demo page served | 38 of 38 pass |
 | Unit tests for metrics, reference patterns, split and gate logic (pytest) | 25 of 25 pass |
 | Tuning pairs (n=1,320): hit@5 / hit@10 / MRR | 0.2955 / 0.3788 / 0.1967 (naive 0.1742 / 0.2455 / 0.1206) |
 | Held-out pairs (n=566): hit@5 / hit@10 / MRR | 0.2208 / 0.3074 / 0.1429 (naive 0.1396 / 0.1767 / 0.0981) |
@@ -58,6 +58,12 @@ tuning pairs (`results/failures.json`). Held-out results are lower than tuning r
   threshold. They were caught in the first pass only by the per-pair rule.
 - **Statistical uncertainty.** No confidence intervals were computed. With 566 held-out pairs the standard error of
   hit@10 is roughly 0.02; tuning differences of a few thousandths are not meaningful.
+
+## Added after the final run
+
+A static demo page (`public/index.html`, served by the API at `/`) was added at the owner's request; the original scope
+had no web page. It was checked by hand in a browser with one example query (ten results, no console errors) and by one
+API test. It has no automated browser tests, and it changes nothing in the search or the measured numbers.
 
 ## Open issues
 

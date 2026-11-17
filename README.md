@@ -30,6 +30,7 @@ and was not tested is in [docs/FINAL_REPORT.md](docs/FINAL_REPORT.md).
 | path | purpose |
 |---|---|
 | `src/` | Express API (`app.ts`), query builder (`query.ts`), indexer (`indexer.ts`), parameters (`config.ts`), text clean-up (`text.ts`), planted-bug flags (`flags.ts`) |
+| `public/` | static demo page (plain HTML and JavaScript, calls `POST /similar`) |
 | `tests/` | API tests (vitest + supertest) against a real Elasticsearch, with synthetic fixtures |
 | `eval/` | pair extraction (`pairs.py`), evaluation (`evaluate.py`), regression gate (`gate.py`), unit tests (`test_eval.py`) |
 | `scripts/` | Elasticsearch setup/start/stop, issue fetch, evaluation and tuning runners, planted-bug runner, README renderer |
@@ -56,8 +57,11 @@ cp .env.example .env         # put a read-only token for public repositories int
 
 # 4. Index and run
 npm run index
-npm start                    # http://127.0.0.1:3187
+npm start                    # http://127.0.0.1:3187  (demo page at /, API at POST /similar)
 ```
+
+Open http://127.0.0.1:3187/ for a small demo page: type a title and description, or click an example, and the ten
+most similar existing reports are listed with links to GitHub.
 
 **Local development only.** `scripts/es_setup.sh` configures Elasticsearch with security disabled
 (`xpack.security.enabled: false`), a single node, a 1 GB heap, bound to `127.0.0.1`, and with the disk-watermark

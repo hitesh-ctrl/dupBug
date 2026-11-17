@@ -156,6 +156,20 @@ describe("POST /similar: hostile strings are treated as plain text", () => {
   });
 });
 
+describe("demo page", () => {
+  it("serves the static page at / and JSON 404 elsewhere", async () => {
+    const page = await request(app).get("/");
+    expect(page.status).toBe(200);
+    expect(page.headers["content-type"]).toMatch(/text\/html/);
+    expect(page.text).toContain("Duplicate bug report finder");
+    const missing = await request(app).get("/nope");
+    expect(missing.status).toBe(404);
+    expect(missing.body).toEqual({ error: "not_found" });
+    const traversal = await request(app).get("/..%2fpackage.json");
+    expect(traversal.status).not.toBe(200);
+  });
+});
+
 describe("POST /similar: Elasticsearch down", () => {
   it("answers 503 without a stack trace or internal details", async () => {
     const deadClient = new Client({ node: "http://127.0.0.1:59999", maxRetries: 0, requestTimeout: 1000 });

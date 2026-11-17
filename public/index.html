@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duplicate bug report finder</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1b1f24; --muted: #5d6673; --line: #dfe3e8;
+    --accent: #1f5fd0; --accent-text: #ffffff; --bar: #c9d9f7; --error: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171b; --card: #1d2126; --text: #e8eaed; --muted: #9aa3ae; --line: #30363d;
+      --accent: #6ea0ff; --accent-text: #0d1117; --bar: #2a3b5c; --error: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  form, .result, .note { background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+  form { padding: 16px; }
+  label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
+  input, textarea { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 6px;
+                    background: var(--bg); color: var(--text); font: inherit; }
+  textarea { min-height: 110px; resize: vertical; }
+  .field { margin-bottom: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button { font: inherit; border-radius: 6px; cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--accent-text); border: 0; padding: 10px 18px; font-weight: 600; }
+  button.primary:disabled { opacity: .6; cursor: default; }
+  button.example { background: transparent; color: var(--accent); border: 1px solid var(--line); padding: 6px 10px; font-size: .85rem; }
+  .examples { margin-top: 14px; color: var(--muted); font-size: .85rem; }
+  #status { margin: 20px 0 10px; color: var(--muted); min-height: 1.5em; }
+  #status.error { color: var(--error); }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .result { padding: 12px 14px; display: grid; grid-template-columns: 2rem 1fr; gap: 4px 8px; }
+  .rank { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .result a { color: var(--accent); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+  .result a:hover { text-decoration: underline; }
+  .meta { grid-column: 2; color: var(--muted); font-size: .85rem; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .bar { height: 6px; width: 120px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; background: var(--accent); }
+  .note { margin-top: 28px; padding: 12px 14px; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Duplicate bug report finder</h1>
+  <p class="lead">Describe a bug. The service returns the existing reports most likely to be the same one,
+    searched over 8,000 public issues of microsoft/terminal.</p>
+
+  <form id="form">
+    <div class="field">
+      <label for="title">Title</label>
+      <input id="title" maxlength="200" required autocomplete="off" placeholder="Short summary of the bug">
+    </div>
+    <div class="field">
+      <label for="body">Description (optional)</label>
+      <textarea id="body" maxlength="5000" placeholder="What happened, steps to reproduce"></textarea>
+    </div>
+    <div class="row">
+      <button class="primary" id="submit" type="submit">Find similar reports</button>
+    </div>
+    <div class="examples row" id="examples"><span>Try:</span></div>
+  </form>
+
+  <div id="status" role="status" aria-live="polite"></div>
+  <ol id="results"></ol>
+
+  <div class="note">Keyword search (Elasticsearch, English stemming). On held-out real duplicates the maintainer-chosen
+    original is in the top 10 for about three in ten; see the README for measured numbers and limits.
+    The bar shows each score relative to the best match, not a probability.</div>
+</main>
+<script>
+const EXAMPLES = [
+  { title: "Cannot type @ with AltGr on a German keyboard", body: "Pressing AltGr+Q does nothing in the terminal, it works in the old console." },
+  { title: "Please add a settings window instead of editing JSON", body: "Changing font and colours by hand in the json file is awkward. A graphical settings page would help." },
+  { title: "New tab should open in the same directory as the current tab", body: "When I open a new tab it starts in my home folder. I want it to start in the folder I was working in." },
+  { title: "Allow dragging tabs to reorder them", body: "" },
+];
+const $ = (id) => document.getElementById(id);
+const form = $("form"), statusEl = $("status"), list = $("results"), submit = $("submit");
+
+for (const ex of EXAMPLES) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "example"; b.textContent = ex.title;
+  b.addEventListener("click", () => { $("title").value = ex.title; $("body").value = ex.body; form.requestSubmit(); });
+  $("examples").appendChild(b);
+}
+
+function setStatus(text, isError) {
+  statusEl.textContent = text;
+  statusEl.className = isError ? "error" : "";
+}
+
+// Results are rendered with textContent only; titles come from public issue data and are untrusted.
+function render(results) {
+  list.replaceChildren();
+  const top = results.length ? results[0].score : 1;
+  results.forEach((r, i) => {
+    const li = document.createElement("li"); li.className = "result";
+    const rank = document.createElement("span"); rank.className = "rank"; rank.textContent = (i + 1) + ".";
+    const a = document.createElement("a"); a.textContent = r.title;
+    if (typeof r.url === "string" && r.url.startsWith("https://github.com/")) {
+      a.href = r.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+    }
+    const meta = document.createElement("div"); meta.className = "meta";
+    const num = document.createElement("span"); num.textContent = "#" + r.number;
+    const date = document.createElement("span"); date.textContent = "opened " + String(r.created_at).slice(0, 10);
+    const bar = document.createElement("span"); bar.className = "bar";
+    const fill = document.createElement("span"); fill.style.width = Math.round(100 * r.score / top) + "%";
+    bar.appendChild(fill);
+    meta.append(num, date, bar);
+    li.append(rank, a, meta);
+    list.appendChild(li);
+  });
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const title = $("title").value.trim();
+  if (!title) { setStatus("Enter a title.", true); return; }
+  submit.disabled = true; setStatus("Searching…");
+  try {
+    const res = await fetch("/similar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, body: $("body").value }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 503) { list.replaceChildren(); setStatus("Search is unavailable right now (Elasticsearch is not reachable).", true); }
+    else if (res.status === 400) { list.replaceChildren(); setStatus("The request was rejected: title must be 1 to 200 characters, description at most 5,000.", true); }
+    else if (!res.ok) { list.replaceChildren(); setStatus("Something went wrong (" + res.status + ").", true); }
+    else {
+      render(data.results);
+      setStatus(data.results.length ? data.results.length + " most similar existing reports" : "No similar reports found.");
+    }
+  } catch {
+    list.replaceChildren(); setStatus("Could not reach the service.", true);
+  } finally {
+    submit.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

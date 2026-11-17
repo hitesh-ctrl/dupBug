@@ -1,5 +1,6 @@
 import { Client, errors } from "@elastic/elasticsearch";
 import express, { type ErrorRequestHandler, type Express } from "express";
+import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { DEFAULT_PARAMS, RESULT_SIZE, type SearchParams } from "./config.js";
 import { buildQuery } from "./query.js";
@@ -88,6 +89,9 @@ export function createApp({ client, index, params = DEFAULT_PARAMS }: AppDeps): 
       res.status(500).json({ error: "internal_error" });
     }
   });
+
+  // Demo page (static files only; the page calls POST /similar like any other client).
+  app.use(express.static(fileURLToPath(new URL("../public", import.meta.url)), { index: "index.html" }));
 
   app.use((_req, res) => {
     res.status(404).json({ error: "not_found" });
