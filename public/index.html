@@ -82,7 +82,11 @@
   a.row:hover { background: var(--subtle); }
   a.row:hover .title { color: var(--link); }
   .icon { width: 16px; height: 16px; fill: var(--open); flex: none; }
+  .title-cell { min-width: 0; display: flex; align-items: center; gap: 6px; }
   .title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+  .ext { width: 12px; height: 12px; flex: none; fill: var(--muted); opacity: .55; }
+  a.row:hover .ext { fill: var(--link); opacity: 1; }
+  a.row:hover .title { text-decoration: underline; }
   .meta { color: var(--muted); font-size: 12px; white-space: nowrap; }
   .label { font-size: 12px; font-weight: 500; line-height: 18px; padding: 0 7px; border: 1px solid var(--border);
            border-radius: 2em; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -165,6 +169,16 @@ const INITIAL_EMPTY = ["Nothing searched yet", "Type a title on the left, or pic
 const dateFmt = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const SVG_NS = "http://www.w3.org/2000/svg";
 
+// Arrow-out-of-box mark: tells the reader the row opens another site.
+function externalIcon() {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 16 16"); svg.setAttribute("class", "ext"); svg.setAttribute("aria-hidden", "true");
+  const p = document.createElementNS(SVG_NS, "path");
+  p.setAttribute("d", "M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .14.11.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.78 2.78 2 3.75 2Zm6.85-.5h3.65a.25.25 0 0 1 .25.25v3.65a.25.25 0 0 1-.43.18L12.78 4.3 9.53 7.53a.75.75 0 0 1-1.06-1.06l3.25-3.25-1.28-1.29a.25.25 0 0 1 .18-.43Z");
+  svg.appendChild(p);
+  return svg;
+}
+
 // Small "open issue" mark: a ring with a dot.
 function issueIcon() {
   const svg = document.createElementNS(SVG_NS, "svg");
@@ -245,7 +259,10 @@ function render(results) {
     const opened = new Date(r.created_at);
     const meta = span("meta", "#" + r.number);
     if (!Number.isNaN(opened.getTime())) meta.appendChild(span("opened", " opened on " + dateFmt.format(opened)));
-    row.append(issueIcon(), span("title", r.title), meta, span("label", Math.round(100 * r.score / top) + "% match"));
+    const titleCell = span("title-cell");
+    titleCell.appendChild(span("title", r.title));
+    if (linked) titleCell.appendChild(externalIcon());
+    row.append(issueIcon(), titleCell, meta, span("label", Math.round(100 * r.score / top) + "% match"));
     li.appendChild(row);
     list.appendChild(li);
   });
@@ -268,7 +285,7 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.results.length) {
       render(data.results);
-      setStatus("Top " + data.results.length + " matches · click a report to open it on GitHub");
+      setStatus("Top " + data.results.length + " matches · click any report to open it on GitHub");
       // On a phone the results are below the form: bring them into view.
       if (window.matchMedia("(max-width: 900px)").matches) $("h-res").scrollIntoView({ behavior: "smooth", block: "start" });
     } else if (res.ok) {
