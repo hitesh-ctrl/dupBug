@@ -47,16 +47,12 @@ Definitions with worked examples are in [docs/NOTES.md](docs/NOTES.md).
 ## How it works
 
 ```mermaid
-flowchart LR
-    GH[(GitHub REST API)] -->|fetch_issues.py| D[issue cache<br/>gitignored]
-    D -->|indexer.ts| ES[(Elasticsearch<br/>english analyzer)]
-    U[Browser or client] -->|POST /similar| API[Express API<br/>zod validation]
-    API -->|bool query + created_at filter| ES
-    D -->|pairs.py| P[duplicate pairs<br/>manifest/pairs.json]
-    P --> EV[evaluate.py]
-    EV -->|queries| API
-    EV --> R[results/metrics.json]
-    R --> G{gate.py}
+flowchart TB
+    GH[(GitHub issues)] --> IDX[Indexer] --> ES[(Elasticsearch)]
+    UI[Web page or client] -->|POST /similar| API[API] -->|query + time filter| ES
+    GH --> PAIRS[Duplicate pairs]
+    PAIRS --> EVAL[Evaluation] -->|queries| API
+    EVAL --> GATE{Regression gate}
 ```
 
 - **Indexing.** Titles and descriptions are indexed with Elasticsearch's English analyzer (stemming, stop words).
